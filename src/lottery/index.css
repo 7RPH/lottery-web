@@ -5,9 +5,7 @@ body {
 }
 
 body {
-  background:url(https://corp-wecom-cdn.elcapp.cn/outlet_test/material/image/20220113/23221981195248510.png) no-repeat;
-  background-size:100% 100%;
-  /* background:url(https://corp-wecom-cdn.elcapp.cn/outlet_test/material/image/20220112/23138263213265879.png); */
+  background: linear-gradient(to bottom, #131313 0%, #02101c 100%);
   margin: 0;
   font-family: Helvetica, sans-serif;
   overflow: hidden;
@@ -68,7 +66,7 @@ a {
 .element {
   width:125px;
   height: 166px;
-  box-shadow: 0 0 12px rgba(249, 192, 94);
+  box-shadow: 0 0 12px rgba(0, 255, 255, 0.5);
   /* border: 1px solid rgba(249, 192, 94); */
   text-align: center;
   cursor: default;
@@ -86,7 +84,7 @@ a {
   right: 0;
   width: 100%;
   font-size: 25px;
-  color: #d6eea1;
+  color: rgba(127, 255, 255, 0.75);
 }
 
 .element .name {
@@ -97,8 +95,8 @@ a {
   right: 0;
   font-size: 26px;
   font-weight: bold;
-  color: #f9c05e;
-  text-shadow: 0 0 1px rgba(249, 192, 94, 0.95);
+  color: rgba(255, 255, 255, 0.75);
+  text-shadow: 0 0 1vh rgba(0, 255, 255, 0.95);
 }
 
 .element .details {
@@ -111,9 +109,9 @@ a {
 }
 
 button {
-  color: #f9c05e;
+  color: rgba(127, 255, 255, 0.75);
   background: transparent;
-  outline: 1px solid #f9c05e;
+  outline: 1px solid rgba(127, 255, 255, 0.75);
   border: 0;
   padding: 1.6vh 4vh;
   margin: 0 4.6vh;
@@ -123,17 +121,17 @@ button {
 }
 
 button:hover {
-  background-color: rgba(255,255,0, .5);
+  background-color: rgba(0, 255, 255, 0.5);
 }
 
 button:active {
-  color: #fff;
-  background-color: rgba(255,255,0, .7);
+  color: #000000;
+  background-color: rgba(0, 255, 255, 0.75);
 }
 
 .highlight {
-  background-color: #e6b175 !important;
-  box-shadow: 0 0 12px #e6b175;
+  background-color: rgba(253, 105, 0, 0.95) !important;
+  box-shadow: 0 0 12px rgba(253, 105, 0, 0.95);
   /* border: 1px solid  rgba(0, 0, 0, 0.5); */
   /* color: #000000!important; */
 }
@@ -168,7 +166,7 @@ video {
   /* background-color: #f9c05e !important; */
 
   /* background:url(https://corp-wecom-cdn.elcapp.cn/outlet_test/material/image/20220112/23143769899272448.png) no-repeat; */
-  background:url(https://corp-wecom-cdn.elcapp.cn/outlet_test/material/image/20220113/23202548765399331.png) no-repeat;
+  background-color: rgba(253, 105, 0, 0.85) !important;
 
 
   background-size:100% 100%;
@@ -183,8 +181,8 @@ video {
 .highlight .company,
 .highlight .name,
 .highlight .details {
-  /* color: rgba(255, 255, 255, 0.85); */
-  color: #c82121
+  color: rgba(255, 255, 255, 0.85);
+  /* color: #c82121 */
 
 }
 
@@ -235,7 +233,7 @@ video {
   flex-wrap: nowrap;
   background-color: rgba(0, 127, 127, 0.37);
   border: 1px solid rgba(127, 255, 255, 0.25);
-  color: rgba(255,255,0, .9);
+  color: rgba(127, 255, 255, 0.75);
   width: 100%;
   height: 10vh;
   box-sizing: border-box;
@@ -562,8 +560,8 @@ video {
   font-size: 1.4vh;
   color: #fff;
   cursor: pointer;
-  /* background-color: rgba(253, 105, 0, 0.9); */
- background: url(https://corp-wecom-cdn.elcapp.cn/outlet_test/material/image/20220113/23229171906123500.svg) no-repeat;
+  background-color: rgba(253, 105, 0, 0.9);
+ /* background: url(https://corp-wecom-cdn.elcapp.cn/outlet_test/material/image/20220113/23229171906123500.svg) no-repeat; */
  background-size: 100% 100%;
   /* border: 1px solid rgba(255, 255, 255, 0.5); */
 }
@@ -584,4 +582,9 @@ video {
 
 .margin-l-40 {
   margin-left: 40px;
+}
+
+#lottery {
+  animation: breath 1.6s linear infinite;
+  box-shadow: 0px 0px 15px rgb(127 255 255 / 75%);
 }
