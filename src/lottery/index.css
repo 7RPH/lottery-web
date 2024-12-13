@@ -42,6 +42,14 @@ a {
   left: 0;
   top: 0;
   z-index: -1;
+  width: 100%;
+  height: 100%;
+}
+
+#canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 #info {
@@ -64,8 +72,8 @@ a {
 }
 
 .element {
-  width:125px;
-  height: 166px;
+  width:12vh;
+  height: 16vh;
   box-shadow: 0 0 12px rgba(0, 255, 255, 0.5);
   /* border: 1px solid rgba(249, 192, 94); */
   text-align: center;
@@ -80,20 +88,20 @@ a {
 
 .element .company {
   position: absolute;
-  top: 27%;
+  top: 1.2vh;
   right: 0;
   width: 100%;
-  font-size: 25px;
+  font-size: 2vh;
   color: rgba(127, 255, 255, 0.75);
 }
 
 .element .name {
   margin: 0 10px;
   position: absolute;
-  top: 52%;
+  top: 4.6vh;
   left: 0;
   right: 0;
-  font-size: 26px;
+  font-size: 2.9vh;
   font-weight: bold;
   color: rgba(255, 255, 255, 0.75);
   text-shadow: 0 0 1vh rgba(0, 255, 255, 0.95);
@@ -136,12 +144,14 @@ button:active {
   /* color: #000000!important; */
 }
 .bg-box{
+  position: fixed;
   width: 100%;
   height: 100%;
-  background: linear-gradient(to bottom, #131313 0%, #02101c 100%);
+  background: transparent;
   margin: 0;
   font-family: Helvetica, sans-serif;
   overflow: hidden;
+  z-index: -2;
 }
 .bg-video
  {

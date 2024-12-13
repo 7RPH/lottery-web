@@ -131,9 +131,9 @@ function setSecret(nowItem, basicData) {
   }
 }
 //颜色
-const rgba = "0,0,0"
+const rgba = "0,127,127"
 //透明度
-const opacity = () => 0.3 || Math.random() * 0.7 + 0.25
+const opacity = () => Math.random() * 0.7 + 0.25
 //气氛组卡片
 const atmosphereGroupCard = () => `rgba(${rgba},${opacity()})`
 //背景色

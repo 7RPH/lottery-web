@@ -1,6 +1,6 @@
 import "./index.css";
 import "../css/animate.min.css";
-import "./canvas.js";
+import initCanvas from "./canvas.js";
 import {
   addQipao,
   setPrizes,
@@ -1217,4 +1217,5 @@ window.onload = function () {
     replaceMusic("enter-BGM")
     // musicBox.click();
   }, 2000);
+  initCanvas();
 };
