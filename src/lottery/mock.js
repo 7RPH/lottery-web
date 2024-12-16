@@ -5,7 +5,10 @@
  * @LastEditTime: 2022-06-21 18:34:34
  * @LastEditors: Gavin
  */
-const test = [
+import * as XLSX from 'xlsx';
+
+// 默认数据，当没有上传 Excel 时使用
+const defaultData = [
   ["000016", "佐助", "技术部"]
   , ["000022", "赵云", "技术部"]
   , ["000019", "金角大王", "技术部"]
@@ -25,20 +28,70 @@ const test = [
   , ["000020", "银角大王", "技术部"]
   , ["000001", "周芷若", "技术部"]
   , ["000005", "张无忌", "技术部"]
-]
+];
+
+let currentData = [...defaultData];
+
+// 解析 Excel 文件
+export function parseExcel(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    
+    reader.onload = (e) => {
+      try {
+        const data = e.target.result;
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        
+        // 将 Excel 数据转换为数组
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        
+        // 过滤掉空行和处理数据格式
+        const processedData = jsonData
+          .filter(row => row.length >= 3 && row[0] && row[1] && row[2])
+          .map(row => [
+            String(row[0]), // 工号
+            String(row[1]), // 姓名
+            String(row[2])  // 部门
+          ]);
+
+        if (processedData.length === 0) {
+          reject(new Error('Excel 文件中没有有效数据'));
+          return;
+        }
+
+        // 更新当前数据
+        currentData = processedData;
+        let storeData = getUsers();
+        console.log('上传excel更新数据', storeData);
+        localStorage.setItem("allUser", JSON.stringify(storeData));
+        localStorage.setItem("leftUsers", JSON.stringify(storeData));
+        // console.log(currentData);
+        resolve(processedData);
+      } catch (error) {
+        reject(new Error('Excel 文件解析失败: ' + error.message));
+      }
+    };
+
+    reader.onerror = () => {
+      reject(new Error('文件读取失败'));
+    };
+
+    reader.readAsArrayBuffer(file);
+  });
+}
 
 function randomsort(a, b) {
   return Math.random() > .5 ? -1 : 1;
-  //用Math.random()函数生成0~1之间的随机数与0.5比较，返回-1或1
 }
 
+// 导出当前数据（随机排序后）
+export const getUsers = () => currentData.sort(randomsort);
 
+// 导出其他必要的常量
+export const COMPANY = "Github";
 
-const user = test.sort(randomsort)
-/**
- * 卡片公司名称标识
- */
-const COMPANY = "Github";
 /**
  * 奖品设置
  * type: 唯一标识，0是默认特别奖的占位符，其它奖品不可使用
@@ -107,10 +160,9 @@ const prizes = [
 ];
 let luckyData = JSON.parse(localStorage.getItem("luckyData")) || {};
 
-let leftUsers = JSON.parse(localStorage.getItem("leftUsers")) || user;
+let leftUsers = JSON.parse(localStorage.getItem("leftUsers")) || getUsers();
 
 let awardList = JSON.parse(localStorage.getItem("awardList")) || {}
-
 
 //不能说的秘密
 const excludeUser = [["000005", "张无忌", "技术部"]]
@@ -137,7 +189,7 @@ const opacity = () => Math.random() * 0.7 + 0.25
 //气氛组卡片
 const atmosphereGroupCard = () => `rgba(${rgba},${opacity()})`
 //背景色
-const background = "url(https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fimg.zcool.cn%2Fcommunity%2F01ef5e59c878d5a8012053f8c53ab7.jpg%401280w_1l_2o_100sh.jpg&refer=http%3A%2F%2Fimg.zcool.cn&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1645253836&t=e6413ccc6469632cf5476f5f6067e13b)"
+const background = ""
 //背景动态壁纸模式 不用时可以设置为null或者注释
 // const bgVideo="//game.gtimg.cn/images/lol/act/a20220121lunarpass/bg.mp4"
 const width = window.innerWidth * .75
@@ -146,4 +198,4 @@ const height = window.innerWidth * .75 * .75
  * 一次抽取的奖品个数与prizes对应
  */
 const EACH_COUNT = [1, 1, 1, 5, 5];
-export default { EACH_COUNT, prizes, COMPANY, user, luckyData, leftUsers, awardList, excludeUser, atmosphereGroupCard, background, setSecret, width, height, bgVideo }
+export default { EACH_COUNT, prizes, COMPANY, getUsers, luckyData, leftUsers, awardList, excludeUser, atmosphereGroupCard, background, setSecret, width, height }

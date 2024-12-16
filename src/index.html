@@ -23,34 +23,36 @@
 
   <div class="bg-box" id="bgVideo"> </div>
 
-  <script src="./lib/three.min.js"></script>
-  <script src="./lib/tween.min.js"></script>
-  <script src="./lib/TrackballControls.js"></script>
-  <script src="./lib/CSS3DRenderer.js"></script>
-  <script src="./lib/ajax.js"></script>
-
-  <div class="music">
+  <!-- <div class="music">
     <audio id="music" class="music-item" loop></audio>
     <div id="musicBox" class="music-box" title="播放/暂停背景音乐"></div>
-  </div>
+  </div> -->
 
   <div id="prizeBar"></div>
 
   <div id="container"></div>
 
   <div id="menu">
+    <input type="file" id="fileInput" accept=".xlsx,.xls" style="display: none;">
+    <button id="uploadExcel">上传名单</button>
     <button id="enter">进入抽奖</button>
     <div id="lotteryBar" class="none">
       <button id="lottery">抽奖</button>
       <button id="reLottery">重新抽奖</button>
       <!-- <button id="result">返回首页</button> -->
       <!-- <button id="back">返回首页</button> -->
-      <button id="awards">颁奖模式</button>
+      <!-- <button id="awards">颁奖模式</button> -->
       <button id="reset" class="margin-l-40">重置</button>
     </div>
   </div>
 
   <div class="qipao-container"></div>
+
+  <script src="./lib/three.min.js"></script>
+  <script src="./lib/tween.min.js"></script>
+  <script src="./lib/TrackballControls.js"></script>
+  <script src="./lib/CSS3DRenderer.js"></script>
+  <script src="./lib/ajax.js"></script>
 </body>
 
 </html>

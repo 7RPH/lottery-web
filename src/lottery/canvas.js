@@ -1,5 +1,5 @@
 // Canvas background animation
-console.log('Canvas script starting...');
+// console.log('Canvas script starting...');
 
 function initCanvas() {
   window.requestAnimFrame = (function() {
@@ -7,7 +7,7 @@ function initCanvas() {
   })();
   
   var canvas = document.getElementById("canvas");
-  console.log('Canvas element:', canvas);
+  // console.log('Canvas element:', canvas);
   
   if (!canvas) {
     console.error('Canvas element not found!');
@@ -17,19 +17,19 @@ function initCanvas() {
   let w, h;
   
   function setSize() {
-    console.log('Setting canvas size...');
+    // console.log('Setting canvas size...');
     w = window.innerWidth;
     h = window.innerHeight;
     canvas.width = w;
     canvas.height = h;
-    console.log('Canvas size set to:', w, 'x', h);
+    // console.log('Canvas size set to:', w, 'x', h);
   }
   
   window.addEventListener('resize', setSize);
   setSize();
 
   var c = canvas.getContext("2d");
-  console.log('Canvas context:', c);
+  // console.log('Canvas context:', c);
 
   var numStars = 1500;
   var radius = "0." + Math.floor(Math.random() * 9) + 1;
@@ -131,8 +131,8 @@ function initCanvas() {
   }
 
   initializeStars();
-  console.log('Stars initialized:', stars.length);
-  console.log('Starting animation...');
+  // console.log('Stars initialized:', stars.length);
+  // console.log('Starting animation...');
   executeFrame();
 }
 
