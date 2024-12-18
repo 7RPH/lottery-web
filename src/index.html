@@ -33,8 +33,37 @@
   <div id="container"></div>
 
   <div id="menu">
-    <input type="file" id="fileInput" accept=".xlsx,.xls" style="display: none;">
-    <button id="uploadExcel">上传名单</button>
+    <button id="uploadButton">设置数据</button>
+    <div id="uploadBox" class="upload-box">
+      <div class="upload-content">
+        <h3>上传名单</h3>
+        <p>支持.xlsx格式文件</p>
+        <div class="file-input-wrapper">
+          <label for="fileInput" class="file-input-label">
+            <span class="file-input-button">选择文件</span>
+            <span class="file-name">未选择文件</span>
+          </label>
+          <input type="file" id="fileInput" accept=".xlsx,.xls" class="file-input">
+        </div>
+        <div class="custom-columns-wrapper hidden">
+          <h4>自定义新增数据列</h4>
+          <div class="custom-column-input">
+            <input type="text" id="newColumnName" class="input-field" placeholder="输入新列名">
+            <button id="addColumn" class="add-column-btn">添加</button>
+          </div>
+          <div id="customColumns" class="custom-columns-list">
+            <!-- 动态添加的列名标签 -->
+          </div>
+        </div>
+        <div id="columnSelection" class="column-selection hidden">
+          <h4>请选择展示数据列</h4>
+          <div class="columns-container">
+            <!-- 动态添加的列选择框 -->
+          </div>
+        </div>
+        <button id="uploadExcel" class="upload-btn" disabled>设置完成</button>
+      </div>
+    </div>
     <button id="enter">进入抽奖</button>
     <div id="lotteryBar" class="none">
       <button id="lottery">抽奖</button>
@@ -42,6 +71,7 @@
       <!-- <button id="result">返回首页</button> -->
       <!-- <button id="back">返回首页</button> -->
       <!-- <button id="awards">颁奖模式</button> -->
+      <button id="exportResult">导出结果</button>
       <button id="reset" class="margin-l-40">重置</button>
     </div>
   </div>

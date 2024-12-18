@@ -9,7 +9,8 @@ import {
   resetPrize
 } from "./prizeList";
 import { NUMBER_MATRIX } from "./config.js";
-import mockData, { parseExcel } from "./mock";
+import mockData, { parseExcelWithMapping } from "./mock";
+import * as XLSX from 'xlsx';
 
 let ROTATE_TIME = 1000;
 const BASE_HEIGHT = 1080;
@@ -19,7 +20,7 @@ let TOTAL_CARDS,
   btns = {
     enter: document.querySelector("#enter"),
     lotteryBar: document.querySelector("#lotteryBar"),
-    upload: document.querySelector("#uploadExcel")
+    upload: document.querySelector("#uploadButton")
   },
   prizes,
   EACH_COUNT,
@@ -216,51 +217,149 @@ function bindEvent() {
   // console.log('Binding events...'); // 调试日志
   
   const fileInput = document.getElementById('fileInput');
-  const uploadButton = document.getElementById('uploadExcel');
+  const uploadExcel = document.getElementById('uploadExcel');
+  const uploadButton = document.getElementById('uploadButton');
+  const uploadBox = document.getElementById('uploadBox');
+  const fileName = document.querySelector('.file-name');
+  const columnSelection = document.getElementById('columnSelection');
+  const columnsContainer = document.querySelector('.columns-container');
+  const newColumnInput = document.getElementById('newColumnName');
+  const addColumnBtn = document.getElementById('addColumn');
+  const customColumnsList = document.getElementById('customColumns');
+  const customColumns = new Set(); // 存储自定义列名
   
-  // console.log('Upload elements:', { fileInput, uploadButton }); // 调试日志
-  
-  if (uploadButton && fileInput) {
-    // 处理文件上传
-    uploadButton.addEventListener('click', () => {
-      // console.log('Upload button clicked'); // 调试日志
-      fileInput.click();
-    });
+  let isBoxVisible = false;
+// 文件选择处理
+const customColumnsWrapper = document.querySelector('.custom-columns-wrapper');
 
-    fileInput.addEventListener('change', async (event) => {
-      // console.log('File selected:', event.target.files[0]); // 调试日志
-      const file = event.target.files[0];
-      if (!file) return;
-
-      try {
-        await parseExcel(file);
-        console.log(mockData.leftUsers);
-        resetCard();
-        // 重置所有数据
-        currentLuckys = [];
-        basicData.leftUsers = Object.assign([], basicData.users);
-        basicData.luckyUsers = {};
-        currentPrizeIndex = basicData.prizes.length - 1;
-        currentPrize = basicData.prizes[currentPrizeIndex];
-
-        resetPrize(currentPrizeIndex);
-        localStorage.setItem("setExcel", true);
-        // switchScreen("enter");
-        location.reload()
-        // resetMock();
-        
-        alert('名单上传成功！');
-        // 重置文件输入框，允许重复上传同一个文件
-        fileInput.value = '';
-      } catch (error) {
-        alert(error.message);
-        fileInput.value = '';
-      }
-    });
-  } else {
-    console.error('Upload elements not found!'); // 调试日志
+fileInput.addEventListener('change', async (event) => {
+  const file = event.target.files[0];
+  if (!file) {
+    fileName.textContent = '未选择文件';
+    uploadExcel.disabled = true;
+    columnSelection.classList.add('hidden');
+    customColumnsWrapper.classList.add('hidden');
+    return;
   }
 
+  fileName.textContent = file.name;
+  
+  try {
+    // 预览Excel文件，获取列名
+    const columns = await previewExcel(file);
+    
+    // 清空之前的选项
+    columnsContainer.innerHTML = '';
+    
+    // 创建单个列选择
+    const item = document.createElement('div');
+    item.className = 'column-item';
+    item.innerHTML = `
+      <label>选择数据列:</label>
+      <select name="dataColumn">
+        <option value="">请选择</option>
+        ${columns.map((col, index) => `
+          <option value="${index}">${col}</option>
+        `).join('')}
+      </select>
+    `;
+    columnsContainer.appendChild(item);
+    
+    columnSelection.classList.remove('hidden');
+    customColumnsWrapper.classList.remove('hidden');
+    uploadExcel.disabled = false;
+    
+  } catch (error) {
+    alert(error.message);
+    fileName.textContent = '文件解析失败';
+    uploadExcel.disabled = true;
+    columnSelection.classList.add('hidden');
+    customColumnsWrapper.classList.add('hidden');
+  }
+});
+
+// 上传按钮处理
+uploadExcel.addEventListener('click', async () => {
+  const file = fileInput.files[0];
+  if (!file) return;
+  
+  // 获取用户选择的列
+  const selectedColumn = document.querySelector('select[name="dataColumn"]').value;
+  const customColumns = Array.from(document.querySelectorAll('.column-tag'))
+      .map(tag => tag.textContent.replace('×', '').trim());
+  // 验证是否选择了列
+  if (selectedColumn === '') {
+    alert('请选择数据列');
+    return;
+  }
+  // 验证是否设置了自定义列
+  if (customColumns.length === 0) {
+    alert('请设置自定义列');
+    return;
+  }
+  
+  try {
+    await parseExcelWithMapping(file, selectedColumn);
+    hideUploadBox();
+    localStorage.setItem("setExcel", true);
+    location.reload();
+  } catch (error) {
+    alert(error.message);
+  }
+});
+
+  uploadButton.addEventListener('click', (event) => {
+    event.stopPropagation(); // 阻止事件冒泡
+    
+    // 如果弹窗已经显示，则隐藏它
+    if (isBoxVisible) {
+      hideUploadBox();
+      return;
+    }
+    
+    // 显示弹窗
+    const rect = uploadButton.getBoundingClientRect();
+    uploadBox.style.left = `${rect.left + rect.width/2}px`; 
+    uploadBox.style.top = `${rect.top}px`;
+    uploadBox.style.transform = 'translate(-50%, 0) scale(0.5)';
+    uploadBox.style.opacity = '0';
+    uploadBox.style.display = 'block';
+    
+    requestAnimationFrame(() => {
+      uploadBox.style.transition = 'all 0.3s ease-out';
+      uploadBox.style.transform = 'translate(-50%, -120%) scale(1)';
+      uploadBox.style.opacity = '1';
+    });
+    
+    isBoxVisible = true;
+  });
+
+  // 点击上传框内部时阻止事件冒泡
+  uploadBox.addEventListener('click', (event) => {
+    event.stopPropagation();
+  });
+
+  // 点击任何地方都会触发隐藏
+  document.addEventListener('click', () => {
+    if (isBoxVisible) {
+      hideUploadBox();
+    }
+  });
+
+  // 封装隐藏弹窗的函数
+  function hideUploadBox() {
+    uploadBox.style.transition = 'all 0.3s ease-in';
+    uploadBox.style.transform = 'translate(-50%, 0) scale(0.5)';
+    uploadBox.style.opacity = '0';
+    
+    setTimeout(() => {
+      uploadBox.style.display = 'none';
+    }, 300);
+    
+    isBoxVisible = false;
+  }
+
+  
   document.querySelector("#menu").addEventListener("click", function (e) {
     e.stopPropagation();
     // 如果正在抽奖，则禁止一切操作'
@@ -416,6 +515,107 @@ function bindEvent() {
   });
 
   window.addEventListener("resize", onWindowResize, false);
+
+  // 添加新列名
+  addColumnBtn.addEventListener('click', () => {
+    const columnName = newColumnInput.value.trim();
+    if (!columnName) return;
+    
+    if (customColumns.has(columnName)) {
+      alert('该列名已存在');
+      return;
+    }
+    
+    customColumns.add(columnName);
+    
+    // 创建列名标签
+    const tag = document.createElement('span');
+    tag.className = 'column-tag';
+    tag.innerHTML = `
+      ${columnName}
+      <span class="remove-btn">×</span>
+    `;
+    
+    // 删除列名
+    tag.querySelector('.remove-btn').addEventListener('click', () => {
+      customColumns.delete(columnName);
+      tag.remove();
+    });
+    
+    customColumnsList.appendChild(tag);
+    newColumnInput.value = '';
+  });
+  
+  // 回车添加列名
+  newColumnInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      addColumnBtn.click();
+    }
+  });
+
+  const exportButton = document.getElementById('exportResult');
+  exportButton.addEventListener('click', exportToExcel);
+}
+
+function exportToExcel() {
+  try {
+    // 读取原始Excel文件
+    const originalData = JSON.parse(localStorage.getItem("excelData"));
+    if (!originalData) {
+      alert('没有找到原始数据，请重新上传Excel文件');
+      return;
+    }
+    
+    // 获取自定义列名
+    const customColumns = Array.from(document.querySelectorAll('.column-tag'))
+      .map(tag => tag.textContent.replace('×', '').trim());
+    
+    // 为每行数据添加自定义列和随机值
+    const exportData = originalData.map(row => {
+      const newRow = Object.assign({}, row);      
+      // 添加自定义列
+      customColumns.forEach(colName => {
+        newRow[colName] = getRandomValue();
+      });
+      
+      return newRow;
+    });
+    
+    // 创建新的工作表
+    const newWs = XLSX.utils.json_to_sheet(exportData, { skipHeader: true });
+    
+    // 创建新的工作簿并添加工作表
+    const newWb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(newWb, newWs, '抽奖结果');
+    
+    // 导出文件
+    XLSX.writeFile(newWb, '抽奖结果.xlsx');
+    
+  } catch (error) {
+    alert('导出失败：' + error.message);
+    console.error('导出错误:', error);
+  }
+}
+
+// 获取用户中奖的奖项名称
+function getPrizeName(row) {
+  // 根据用户选择的数据列获取标识符
+  const selectedColumn = document.querySelector('select[name="dataColumn"]').value;
+  const identifier = row[Object.keys(row)[selectedColumn]];
+  
+  // 在中奖记录中查找
+  for (const [type, users] of Object.entries(basicData.luckyUsers)) {
+    if (users.some(u => u[0] === String(identifier))) {
+      const prize = basicData.prizes.find(p => p.type === parseInt(type));
+      return prize ? prize.title : '未中奖';
+    }
+  }
+  return '未中奖';
+}
+
+// 生成随机值
+function getRandomValue() {
+  return lotteryRan(100, 1)[0]; // 生成1-100的随机数
 }
 
 //场景转换
@@ -745,7 +945,7 @@ function lottery() {
 
       // let luckyId = random(leftCount);
 
-      //feat@原写法重新抽奖会排除池子里的人
+      //feat@原写法重新抽会排除池子里的人
       // currentLuckys.push(cloneLeftUsers.splice(luckyId, 1)[0]);
       // console.log(luckyId);
       // console.error(basicData.leftUsers[luckyId],basicData.leftUsers,luckyId);
@@ -771,26 +971,17 @@ function lottery() {
 }
 
 function lotteryRan(number, time) {
-  var arr = [];
-  let Random
-  for (var i = 0; i < time; i++) {
-    Random = Math.floor(Math.random() * number);
-    if (arr.includes(Random)) {
-      i--
-    } else {
-      arr.push(Random)
-    }
+  // 创建一个包含从 0 到 number - 1 的数组
+  let arr = Array.from({ length: number }, (_, i) => i);
+  
+  // 洗牌数组
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]]; // 交换元素
   }
-  console.log(arr);
-  //  function Ran(){
-  //           do{
-  //              Random=Math.floor(Math.random()*number);
-  //           } while(arr.indexOf(Random)!=-1)
-  //           arr.push(Random);
-  //  }
-  return arr
-
-
+  console.log(arr.slice(0, time));
+  // 返回前 time 个元素
+  return arr.slice(0, time);
 }
 // lotteryRa(30,5)
 
@@ -1117,3 +1308,58 @@ window.onload = function () {
   }, 2000);
   initCanvas();
 };
+
+// 预览Excel文件，获取列名
+async function previewExcel(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = e.target.result;
+        console.log('File data:', data); // 调试日志
+        
+        const workbook = XLSX.read(data, { type: 'array' });
+        console.log('Workbook:', workbook); // 调试日志
+        
+        const firstSheetName = workbook.SheetNames[0];
+        if (!firstSheetName) {
+          reject(new Error('Excel文件没有工作表'));
+          return;
+        }
+        
+        const worksheet = workbook.Sheets[firstSheetName];
+        if (!worksheet) {
+          reject(new Error('无法读取工作表数据'));
+          return;
+        }
+        
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        console.log('Parsed data:', jsonData); // 调试日志
+        
+        if (!jsonData || jsonData.length === 0) {
+          reject(new Error('Excel文件为空'));
+          return;
+        }
+        localStorage.setItem("excelData", JSON.stringify(jsonData));
+        // 获取第一行作为列名
+        const columns = jsonData[0];
+        if (!columns || columns.length === 0) {
+          reject(new Error('未找到列名'));
+          return;
+        }
+        
+        resolve(columns);
+      } catch (error) {
+        console.error('Excel解析错误:', error); // 调试日志
+        reject(new Error(`Excel文件解析失败: ${error.message}`));
+      }
+    };
+    
+    reader.onerror = (error) => {
+      console.error('文件读取错误:', error); // 调试日志
+      reject(new Error('文件读取失败'));
+    };
+    
+    reader.readAsArrayBuffer(file);
+  });
+}
