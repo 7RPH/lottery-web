@@ -76,7 +76,10 @@ function initStyle() {
   body.style.backgroundImage = mockData.background//背景颜色
 }
 function startMock() {
-
+  if (localStorage.getItem("count")) {
+    mockData.prizes[1].count = parseInt(localStorage.getItem("count"));
+    // mockData.EACH_COUNT[1] = parseInt(localStorage.getItem("count"));
+  } 
   prizes = mockData.prizes;//奖项
   EACH_COUNT = mockData.EACH_COUNT;//抽奖公式["1","2"] 一等奖1,二等奖3 
   COMPANY = mockData.COMPANY;//公司名
@@ -285,8 +288,9 @@ uploadExcel.addEventListener('click', async () => {
   
   // 获取用户选择的列
   const selectedColumn = document.querySelector('select[name="dataColumn"]').value;
-  const customColumns = Array.from(document.querySelectorAll('.column-tag'))
-      .map(tag => tag.textContent.replace('×', '').trim());
+  const customColumns = Array.from(document.querySelectorAll('.column-tag')).map(tag => tag.textContent.replace('×', '').trim());
+  localStorage.setItem("customColumns", JSON.stringify(customColumns));
+      
   // 验证是否选择了列
   if (selectedColumn === '') {
     alert('请选择数据列');
@@ -560,29 +564,32 @@ uploadExcel.addEventListener('click', async () => {
 function exportToExcel() {
   try {
     // 读取原始Excel文件
-    const originalData = JSON.parse(localStorage.getItem("excelData"));
+    let originalData = JSON.parse(localStorage.getItem("excelData"));
     if (!originalData) {
       alert('没有找到原始数据，请重新上传Excel文件');
       return;
     }
     
-    // 获取自定义列名
-    const customColumns = Array.from(document.querySelectorAll('.column-tag'))
-      .map(tag => tag.textContent.replace('×', '').trim());
+    // 获取列名
+    const originColumns = originalData.shift();
+    const customColumns = JSON.parse(localStorage.getItem("customColumns"));
     
     // 为每行数据添加自定义列和随机值
-    const exportData = originalData.map(row => {
-      const newRow = Object.assign({}, row);      
+    const exportData = originalData.map((row, index) => {
+      const newRow = {};
+      for (let i = 0; i < originColumns.length; i++) {
+        newRow[originColumns[i]] = row[i];
+      }
       // 添加自定义列
-      customColumns.forEach(colName => {
-        newRow[colName] = getRandomValue();
+      customColumns.forEach((colName) => {
+        newRow[colName] = getRandomResult(index);
       });
       
       return newRow;
     });
     
     // 创建新的工作表
-    const newWs = XLSX.utils.json_to_sheet(exportData, { skipHeader: true });
+    const newWs = XLSX.utils.json_to_sheet(exportData);
     
     // 创建新的工作簿并添加工作表
     const newWb = XLSX.utils.book_new();
@@ -613,9 +620,11 @@ function getPrizeName(row) {
   return '未中奖';
 }
 
-// 生成随机值
-function getRandomValue() {
-  return lotteryRan(100, 1)[0]; // 生成1-100的随机数
+// 获取抽签结果
+function getRandomResult(index) {
+  const arr = JSON.parse(localStorage.getItem("randomResult"));
+  // console.log(arr, index);
+  return arr.indexOf(index) + 1; // 生成1-100的随机数
 }
 
 //场景转换
@@ -932,7 +941,7 @@ function lottery() {
       leftPrizeCount = currentPrize.count - (luckyData ? luckyData.length : 0);
     const cloneLeftUsers = JSON.parse(JSON.stringify(basicData.leftUsers))
     if (leftCount === 0) {
-      addQipao("人员已抽完，现在重新设置所有人员可以进行二次抽奖！");
+      addQipao("已抽签完毕，现在重新设置所有人员可以进行二次抽签！");
       basicData.leftUsers = basicData.users;
       leftCount = basicData.leftUsers.length;
     }
@@ -980,6 +989,7 @@ function lotteryRan(number, time) {
     [arr[i], arr[j]] = [arr[j], arr[i]]; // 交换元素
   }
   console.log(arr.slice(0, time));
+  localStorage.setItem("randomResult", JSON.stringify(arr.slice(0, time)));
   // 返回前 time 个元素
   return arr.slice(0, time);
 }
@@ -1343,6 +1353,7 @@ async function previewExcel(file) {
         localStorage.setItem("excelData", JSON.stringify(jsonData));
         // 获取第一行作为列名
         const columns = jsonData[0];
+        localStorage.setItem("count", jsonData.length - 1);
         if (!columns || columns.length === 0) {
           reject(new Error('未找到列名'));
           return;
