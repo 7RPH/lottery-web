@@ -82,6 +82,13 @@ function startMock() {
     mockData.prizes[1].count = parseInt(localStorage.getItem("count"));
     mockData.EACH_COUNT[1] = parseInt(localStorage.getItem("count"));
   } 
+  
+  // 检查是否有自定义标题
+  const customTitle = localStorage.getItem('title');
+  if (customTitle) {
+    mockData.prizes[1].title = customTitle;
+  }
+  
   prizes = mockData.prizes;//奖项
   EACH_COUNT = mockData.EACH_COUNT;//抽奖公式["1","2"] 一等奖1,二等奖3 
   COMPANY = mockData.COMPANY;//公司名
@@ -244,10 +251,12 @@ fileInput.addEventListener('change', async (event) => {
     uploadExcel.disabled = true;
     columnSelection.classList.add('hidden');
     customColumnsWrapper.classList.add('hidden');
+    document.querySelector('.title-input-wrapper').classList.add('hidden');
     return;
   }
 
   fileName.textContent = file.name;
+  document.querySelector('.title-input-wrapper').classList.remove('hidden');
   
   try {
     // 预览Excel文件，获取列名
@@ -302,6 +311,11 @@ uploadExcel.addEventListener('click', async () => {
   if (customColumns.length === 0) {
     alert('请设置自定义列');
     return;
+  }
+  
+  const prizeTitle = document.getElementById('prizeTitle').value.trim();
+  if (prizeTitle) {
+    localStorage.setItem('title', prizeTitle);
   }
   
   try {

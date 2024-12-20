@@ -240,6 +240,7 @@ let setPrizeData = (function () {
       prizeElement.prizeType.textContent = mockData.prizes[0].title;
       prizeElement.prizeText.textContent = mockData.prizes[0].text;
       prizeElement.prizeLeft.textContent = 999
+      console.log("mockData.prizes[0].title", mockData.prizes[0].title)
       return;
     }
 

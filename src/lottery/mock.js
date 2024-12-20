@@ -114,8 +114,8 @@ const prizes = [
   {
     type: 1,
     count: 100,
-    text: "抽签",
-    title: "",
+    title: "抽签标题",
+    text: "",
     img: "./img/huawei.png",
     enter: "1st-lottery",//抽奖进行时音乐
     awards: "1st-BJ-BGM",//颁奖音乐
