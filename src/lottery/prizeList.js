@@ -134,18 +134,18 @@ class Qipao {
 let addQipao = (() => {
   let qipaoList = [];
   return function (text) {
-    let qipao;
-    if (qipaoList.length > 0) {
-      qipao = qipaoList.shift();
-    } else {
-      qipao = new Qipao({
-        onComplete() {
-          qipaoList.push(qipao);
-        }
-      });
-    }
+    // let qipao;
+    // if (qipaoList.length > 0) {
+    //   qipao = qipaoList.shift();
+    // } else {
+    //   qipao = new Qipao({
+    //     onComplete() {
+    //       qipaoList.push(qipao);
+    //     }
+    //   });
+    // }
 
-    qipao.start(text);
+    // qipao.start(text);
   };
 })();
 
@@ -163,6 +163,7 @@ function showPrizeList(currentPrizeIndex) {
   let htmlCode = `<div class="prize-mess"><div  class="prize-shine">正在抽取</div>
   
   <label id="prizeType" class="prize-shine">${currentPrize.text}</label><div id="prizeText" class="prize-shine">${currentPrize.title}</div><div><span  class="prize-shine">剩余</span><label id="prizeLeft" class="prize-shine">${currentPrize.count}</label><span  class="prize-shine">个</span></div></div><ul class="prize-list">`;
+  htmlCode = `<ul class="prize-list">`;
   prizes.forEach(item => {
     if (item.type === defaultType) {
       return true;
@@ -171,26 +172,11 @@ function showPrizeList(currentPrizeIndex) {
       item.type == currentPrize.type ? "shine" : ""
     }">
                         <span></span><span></span><span></span><span></span>
-                        <div class="prize-img">
-                            <img src="${item.img}" alt="${item.title}">
-                        </div>
+
                         <div class="prize-text">
                             <div class="prize-title">${item.text} ${
       item.title
     }</div>
-                            <div class="prize-count">
-                                <div class="progress">
-                                    <div id="prize-bar-${
-                                      item.type
-                                    }" class="progress-bar progress-bar-danger progress-bar-striped active" style="width: 100%;">
-                                    </div>
-                                </div>
-                                <div id="prize-count-${
-                                  item.type
-                                }" class="prize-count-left">
-                                    ${item.count + "/" + item.count}
-                                </div>
-                            </div>
                         </div>
                     </li>`;
   });
@@ -262,7 +248,7 @@ let setPrizeData = (function () {
     let percent = (count / totalCount).toFixed(2);
     elements.bar && (elements.bar.style.width = percent * 100 + "%");
     elements.text && (elements.text.textContent = count + "/" + totalCount);
-    prizeElement.prizeLeft.textContent = count;
+    // prizeElement.prizeLeft.textContent = count;
   };
 })();
 
