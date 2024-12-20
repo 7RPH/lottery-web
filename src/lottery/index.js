@@ -794,7 +794,7 @@ function render() {
 function selectCard(duration = 600) {
   rotate = false;
   
-  const PER_PAGE = 50;
+  const PER_PAGE = 50; // 每页显示数量
   const totalPages = Math.ceil(currentLuckys.length / PER_PAGE);
   
   // 获取当前页的数据
@@ -842,9 +842,20 @@ function selectCard(duration = 600) {
     addQipao(`恭喜${text.join("、")}获得${currentPrize.title}${totalPages > 1 ? '，' + pageInfo : ''}`);
 
     const tweens = [];
-    currentPageLuckys.forEach((lucky, index) => {
-      const cardIndex = selectedCardIndex[startIndex + index];
-      changeCard(cardIndex, lucky);
+    const totalCards = ROW_COUNT * COLUMN_COUNT;
+    
+    // 为当前页重新分配卡片索引
+    const pageSelectedIndexes = new Set();
+    while (pageSelectedIndexes.size < displayCount) {
+      const cardIndex = random(totalCards);
+      if (!pageSelectedIndexes.has(cardIndex)) {
+        pageSelectedIndexes.add(cardIndex);
+      }
+    }
+    
+    // 使用新分配的卡片索引
+    Array.from(pageSelectedIndexes).forEach((cardIndex, index) => {
+      changeCard(cardIndex, currentPageLuckys[index]);
       var object = threeDCards[cardIndex];
 
       tweens.push(
@@ -1037,52 +1048,40 @@ function resetCard(duration = 500) {
  * 抽奖
  */
 function lottery() {
-
   rotateBall().then(() => {
-    // 将之前的记录置空
     currentLuckys = [];
     selectedCardIndex = [];
-    // 当前同时抽取的数目,当前奖品抽完还可以继续抽，但是不记录数据
+    
     let perCount = EACH_COUNT[currentPrizeIndex],
       luckyData = basicData.luckyUsers[currentPrize.type],
       leftCount = basicData.leftUsers.length,
       leftPrizeCount = currentPrize.count - (luckyData ? luckyData.length : 0);
-    const cloneLeftUsers = JSON.parse(JSON.stringify(basicData.leftUsers))
+    
+    const cloneLeftUsers = JSON.parse(JSON.stringify(basicData.leftUsers));
+    
     if (leftCount === 0) {
       addQipao("已抽签完毕，现在重新设置所有人员可以进行二次抽签！");
       basicData.leftUsers = basicData.users;
       leftCount = basicData.leftUsers.length;
     }
     currentLuckys = lotteryRan(leftCount, perCount).map(index => {
-      return cloneLeftUsers[index]
-    })
-    console.log(currentLuckys);
+      return cloneLeftUsers[index];
+    });
 
-    for (let i = 0; i < perCount; i++) {
-
-      // let luckyId = random(leftCount);
-
-      //feat@原写法重新抽会排除池子里的人
-      // currentLuckys.push(cloneLeftUsers.splice(luckyId, 1)[0]);
-      // console.log(luckyId);
-      // console.error(basicData.leftUsers[luckyId],basicData.leftUsers,luckyId);
-      // currentLuckys.push(basicData.leftUsers[luckyId]);
-
-      leftCount--;
-      leftPrizeCount--;
-
-      let cardIndex = random(TOTAL_CARDS);
-      while (selectedCardIndex.includes(cardIndex)) {
-        cardIndex = random(TOTAL_CARDS);
-      }
+    // 随机选择要展示的卡片
+    const totalCards = ROW_COUNT * COLUMN_COUNT;
+    const usedIndexes = new Set();
+    
+    for (let i = 0; i < Math.min(perCount, totalCards); i++) {
+      let cardIndex;
+      do {
+        cardIndex = random(totalCards);
+      } while (usedIndexes.has(cardIndex));
+      
+      usedIndexes.add(cardIndex);
       selectedCardIndex.push(cardIndex);
-
-      if (leftPrizeCount === 0) {
-        break;
-      }
     }
 
-    // console.log(currentLuckys);
     selectCard();
   });
 }

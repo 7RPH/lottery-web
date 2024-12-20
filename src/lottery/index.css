@@ -177,19 +177,24 @@ video {
 
 .prize.element {
   transition: background-color 1.5s ease-in 0.3s;
-  /* background-color: #f9c05e !important; */
-
-  /* background:url(https://corp-wecom-cdn.elcapp.cn/outlet_test/material/image/20220112/23143769899272448.png) no-repeat; */
   background-color: rgba(253, 105, 0, 0.85) !important;
-
-
-  background-size:100% 100%;
+  background-size: 100% 100%;
   border-radius: 10%;
-  border:.1px solid #F9D598;
+  border: .1px solid #F9D598;
   box-shadow: 0 0 12px #F9D598;
+    /* 调整卡片大小 */
+    width: 60px;  /* 调整宽度 */
+    height: 80px; /* 调整高度 */
+}
 
-  width: 70px;  /* 调整宽度 */
-  height: 90px; /* 调整高度 */
+.prize.element .name {
+  font-size: 13px;
+  margin-top: 5px;
+}
+
+.prize.element .company {
+  font-size: 12px;
+  margin-top: 8px;
 }
 
 .prize .company,
