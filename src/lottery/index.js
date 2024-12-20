@@ -58,6 +58,8 @@ let selectedCardIndex = [],
   isLotting = false,
   currentLuckys = [];
 
+let currentPage = 0; // 添加全局变量，记录当前页码
+
 initAll();
 
 /**
@@ -78,7 +80,7 @@ function initStyle() {
 function startMock() {
   if (localStorage.getItem("count")) {
     mockData.prizes[1].count = parseInt(localStorage.getItem("count"));
-    // mockData.EACH_COUNT[1] = parseInt(localStorage.getItem("count"));
+    mockData.EACH_COUNT[1] = parseInt(localStorage.getItem("count"));
   } 
   prizes = mockData.prizes;//奖项
   EACH_COUNT = mockData.EACH_COUNT;//抽奖公式["1","2"] 一等奖1,二等奖3 
@@ -606,7 +608,7 @@ function exportToExcel() {
 
 // 获取用户中奖的奖项名称
 function getPrizeName(row) {
-  // 根据用户选择的数据列获取标识符
+  // 根据用户选择的数据列获取识符
   const selectedColumn = document.querySelector('select[name="dataColumn"]').value;
   const identifier = row[Object.keys(row)[selectedColumn]];
   
@@ -791,126 +793,227 @@ function render() {
 
 function selectCard(duration = 600) {
   rotate = false;
-  let width = 140,
-    tag = -(currentLuckys.length - 1) / 2,
-    locates = [];
+  
+  const PER_PAGE = 50;
+  const totalPages = Math.ceil(currentLuckys.length / PER_PAGE);
+  
+  // 获取当前页的数据
+  const startIndex = currentPage * PER_PAGE;
+  const displayCount = Math.min(PER_PAGE, currentLuckys.length - startIndex);
+  const currentPageLuckys = currentLuckys.slice(startIndex, startIndex + displayCount);
+  
+  // 先重置所有卡片位置
+  return resetCardPositions().then(() => {
+    let width = 40,
+      tag = -(displayCount - 1) / 2,
+      locates = [];
 
-  // 计算位置信息, 大于5个分两排显示
-  if (currentLuckys.length > 5) {
-    let yPosition = [-87, 87],
-      l = selectedCardIndex.length,
-      mid = Math.ceil(l / 2);
-    tag = -(mid - 1) / 2;
-    for (let i = 0; i < mid; i++) {
-      locates.push({
-        x: tag * width * Resolution,
-        y: yPosition[0] * Resolution
-      });
-      tag++;
+    // 计算位置信息，每行最多显示10个
+    const ROW_MAX_COUNT = 10;
+    if (displayCount > ROW_MAX_COUNT) {
+      const rows = Math.ceil(displayCount / ROW_MAX_COUNT);
+      const yGap = 200 / (rows - 1);
+      const startY = 70 * (rows - 1) / 2;
+      
+      for (let row = 0; row < rows; row++) {
+        const countInRow = Math.min(ROW_MAX_COUNT, displayCount - row * ROW_MAX_COUNT);
+        const startX = -(countInRow - 1) / 2;
+        
+        for (let col = 0; col < countInRow; col++) {
+          locates.push({
+            x: (startX + col) * width * 2,
+            y: (startY - row * yGap) * 2 - 50
+          });
+        }
+      }
+    } else {
+      for (let i = 0; i < displayCount; i++) {
+        locates.push({
+          x: tag * width * 2,
+          y: -50
+        });
+        tag++;
+      }
     }
 
-    tag = -(l - mid - 1) / 2;
-    for (let i = mid; i < l; i++) {
-      locates.push({
-        x: tag * width * Resolution,
-        y: yPosition[1] * Resolution
-      });
-      tag++;
-    }
-  } else {
-    for (let i = selectedCardIndex.length; i > 0; i--) {
-      locates.push({
-        x: tag * width * Resolution,
-        y: 0 * Resolution
-      });
-      tag++;
-    }
-  }
+    // 显示分页信息
+    let pageInfo = `第${currentPage + 1}/${totalPages}页`;
+    let text = currentPageLuckys.map(item => item[1]);
+    addQipao(`恭喜${text.join("、")}获得${currentPrize.title}${totalPages > 1 ? '，' + pageInfo : ''}`);
 
-  let text = currentLuckys.map(item => item[1]);
-  addQipao(
-    `恭喜${text.join("、")}获得${currentPrize.title}, 新的一年必定旺旺旺。`
-  );
+    const tweens = [];
+    currentPageLuckys.forEach((lucky, index) => {
+      const cardIndex = selectedCardIndex[startIndex + index];
+      changeCard(cardIndex, lucky);
+      var object = threeDCards[cardIndex];
 
-  selectedCardIndex.forEach((cardIndex, index) => {
-    changeCard(cardIndex, currentLuckys[index]);
-    var object = threeDCards[cardIndex];
-    new TWEEN.Tween(object.position)
-      .to(
-        {
-          x: locates[index].x,
-          y: locates[index].y * Resolution,
-          z: 2200
-        },
-        Math.random() * duration + duration
-      )
-      .easing(TWEEN.Easing.Exponential.InOut)
-      .start();
+      tweens.push(
+        new TWEEN.Tween(object.position)
+          .to({
+            x: locates[index].x,
+            y: locates[index].y,
+            z: 2200
+          }, Math.random() * duration + duration)
+          .easing(TWEEN.Easing.Exponential.InOut)
+      );
 
-    new TWEEN.Tween(object.rotation)
-      .to(
-        {
-          x: 0,
-          y: 0,
-          z: 0
-        },
-        Math.random() * duration + duration
-      )
-      .easing(TWEEN.Easing.Exponential.InOut)
-      .start();
+      tweens.push(
+        new TWEEN.Tween(object.rotation)
+          .to({
+            x: 0,
+            y: 0,
+            z: 0
+          }, Math.random() * duration + duration)
+          .easing(TWEEN.Easing.Exponential.InOut)
+      );
 
-    object.element.classList.add("prize");
-    tag++;
-  });
-
-  new TWEEN.Tween(this)
-    .to({}, duration * 2)
-    .onUpdate(render)
-    .start()
-    .onComplete(() => {
-      // 动画结束后可以操作
-      isLotting = false;
+      object.element.classList.add("prize");
     });
+
+    tweens.forEach(tween => tween.start());
+
+    return new Promise((resolve) => {
+      new TWEEN.Tween(this)
+        .to({}, duration * 2)
+        .onUpdate(render)
+        .start()
+        .onComplete(() => {
+          isLotting = false;
+          
+          // 添加翻页按钮
+          if (totalPages > 1) {
+            const prevBtn = document.createElement('button');
+            prevBtn.textContent = '上一页';
+            prevBtn.style.display = currentPage > 0 ? 'inline-block' : 'none';
+            prevBtn.onclick = () => {
+              if (currentPage > 0) {
+                currentPage--;
+                selectCard(duration);
+              }
+            };
+
+            const nextBtn = document.createElement('button');
+            nextBtn.textContent = '下一页';
+            nextBtn.style.display = currentPage < totalPages - 1 ? 'inline-block' : 'none';
+            nextBtn.onclick = () => {
+              if (currentPage < totalPages - 1) {
+                currentPage++;
+                selectCard(duration);
+              }
+            };
+
+            // 移除旧的按钮
+            const oldBtns = document.querySelectorAll('.page-btn');
+            oldBtns.forEach(btn => btn.remove());
+
+            // 添加新按钮
+            const btnContainer = document.createElement('div');
+            btnContainer.style.cssText = `
+              position: fixed; 
+              bottom: 70px;
+              left: 50%; 
+              transform: translateX(-50%); 
+              z-index: 1000;
+              display: flex;
+              gap: 20px;
+              width: auto;
+              justify-content: center;
+            `;
+            btnContainer.classList.add('page-btn');
+            btnContainer.appendChild(prevBtn);
+            btnContainer.appendChild(nextBtn);
+            document.body.appendChild(btnContainer);
+          }
+          resolve();
+        });
+    });
+  });
+}
+
+// 添加新函数：重置卡片位置
+function resetCardPositions(duration = 500) {
+  return new Promise((resolve) => {
+    const tweens = [];
+    threeDCards.forEach((object, index) => {
+      const target = targets.sphere[index];
+      
+      tweens.push(
+        new TWEEN.Tween(object.position)
+          .to({
+            x: target.position.x,
+            y: target.position.y,
+            z: target.position.z
+          }, duration)
+          .easing(TWEEN.Easing.Exponential.InOut)
+      );
+
+      tweens.push(
+        new TWEEN.Tween(object.rotation)
+          .to({
+            x: target.rotation.x,
+            y: target.rotation.y,
+            z: target.rotation.z
+          }, duration)
+          .easing(TWEEN.Easing.Exponential.InOut)
+      );
+
+      object.element.classList.remove("prize");
+    });
+
+    tweens.forEach(tween => tween.start());
+
+    new TWEEN.Tween(this)
+      .to({}, duration)
+      .onUpdate(render)
+      .start()
+      .onComplete(resolve);
+  });
 }
 
 /**
  * 重置抽奖牌内容
  */
 function resetCard(duration = 500) {
+  currentPage = 0; // 重置页码
+  
+  // 移除翻页按钮
+  const oldBtns = document.querySelectorAll('.page-btn');
+  oldBtns.forEach(btn => btn.remove());
+  
   if (currentLuckys.length === 0) {
     return Promise.resolve();
   }
 
-  selectedCardIndex.forEach(index => {
-    let object = threeDCards[index],
-      target = targets.sphere[index];
-
-    new TWEEN.Tween(object.position)
-      .to(
-        {
-          x: target.position.x,
-          y: target.position.y,
-          z: target.position.z
-        },
-        Math.random() * duration + duration
-      )
-      .easing(TWEEN.Easing.Exponential.InOut)
-      .start();
-
-    new TWEEN.Tween(object.rotation)
-      .to(
-        {
-          x: target.rotation.x,
-          y: target.rotation.y,
-          z: target.rotation.z
-        },
-        Math.random() * duration + duration
-      )
-      .easing(TWEEN.Easing.Exponential.InOut)
-      .start();
-  });
-
+  // 重置所有卡片的位置和样式
   return new Promise((resolve, reject) => {
+    const tweens = [];
+    selectedCardIndex.forEach(index => {
+      let object = threeDCards[index],
+        target = targets.sphere[index];
+
+      tweens.push(
+        new TWEEN.Tween(object.position)
+          .to({
+            x: target.position.x,
+            y: target.position.y,
+            z: target.position.z
+          }, Math.random() * duration + duration)
+          .easing(TWEEN.Easing.Exponential.InOut)
+      );
+
+      tweens.push(
+        new TWEEN.Tween(object.rotation)
+          .to({
+            x: target.rotation.x,
+            y: target.rotation.y,
+            z: target.rotation.z
+          }, Math.random() * duration + duration)
+          .easing(TWEEN.Easing.Exponential.InOut)
+      );
+    });
+
+    tweens.forEach(tween => tween.start());
+
     new TWEEN.Tween(this)
       .to({}, duration * 2)
       .onUpdate(render)
@@ -920,6 +1023,11 @@ function resetCard(duration = 500) {
           let object = threeDCards[index];
           object.element.classList.remove("prize");
         });
+        
+        // 清空当前中奖者和选中卡片索引
+        currentLuckys = [];
+        selectedCardIndex = [];
+        
         resolve();
       });
   });

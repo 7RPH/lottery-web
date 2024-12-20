@@ -197,7 +197,7 @@ const height = window.innerWidth * .75 * .75
 /**
  * 一次抽取的奖品个数与prizes对应
  */
-const EACH_COUNT = [1, 1, 1, 5, 5];
+const EACH_COUNT = [1, 100, 1, 5, 5];
 
 export function parseExcelWithMapping(file, selectedColumn) {
   return new Promise((resolve, reject) => {

@@ -186,7 +186,10 @@ video {
   background-size:100% 100%;
   border-radius: 10%;
   border:.1px solid #F9D598;
-  box-shadow: 0 0 12px #F9D598
+  box-shadow: 0 0 12px #F9D598;
+
+  width: 70px;  /* 调整宽度 */
+  height: 90px; /* 调整高度 */
 }
 
 .prize .company,
@@ -806,4 +809,26 @@ video {
 
 .column-tag .remove-btn:hover {
   color: rgba(255, 255, 255, 0.9);
+}
+
+.page-btn button {
+  margin: 0;
+  padding: 8px 20px;
+  border: none;
+  border-radius: 4px;
+  background-color: rgba(253, 105, 0, 0.85);
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-size: 14px;
+  min-width: 80px;
+}
+
+.page-btn button:hover {
+  background-color: rgba(253, 105, 0, 1);
+}
+
+.page-btn button:disabled {
+  background-color: rgba(253, 105, 0, 0.5);
+  cursor: not-allowed;
 }
