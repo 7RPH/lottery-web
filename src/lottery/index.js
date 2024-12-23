@@ -818,7 +818,7 @@ function selectCard(duration = 600) {
   
   // 先重置所有卡片位置
   return resetCardPositions().then(() => {
-    let width = 40,
+    let width = 70,
       tag = -(displayCount - 1) / 2,
       locates = [];
 
@@ -826,8 +826,8 @@ function selectCard(duration = 600) {
     const ROW_MAX_COUNT = 10;
     if (displayCount > ROW_MAX_COUNT) {
       const rows = Math.ceil(displayCount / ROW_MAX_COUNT);
-      const yGap = 200 / (rows - 1);
-      const startY = 70 * (rows - 1) / 2;
+      const yGap = 300 / (rows - 1);
+      const startY = 90 * (rows - 1) / 2;
       
       for (let row = 0; row < rows; row++) {
         const countInRow = Math.min(ROW_MAX_COUNT, displayCount - row * ROW_MAX_COUNT);
@@ -877,7 +877,7 @@ function selectCard(duration = 600) {
           .to({
             x: locates[index].x,
             y: locates[index].y,
-            z: 2200
+            z: 1700
           }, Math.random() * duration + duration)
           .easing(TWEEN.Easing.Exponential.InOut)
       );
@@ -935,12 +935,12 @@ function selectCard(duration = 600) {
             const btnContainer = document.createElement('div');
             btnContainer.style.cssText = `
               position: fixed; 
-              bottom: 70px;
+              bottom: 11vh;
               left: 50%; 
               transform: translateX(-50%); 
               z-index: 1000;
               display: flex;
-              gap: 20px;
+              gap: 1vh;
               width: auto;
               justify-content: center;
             `;

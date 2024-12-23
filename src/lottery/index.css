@@ -56,9 +56,9 @@ a {
   position: absolute;
   width: 100%;
   color: #ffffff;
-  padding: 5px;
+  padding: 0.5vh;
   font-family: Monospace;
-  font-size: 13px;
+  font-size: 1.3vh;
   font-weight: bold;
   text-align: center;
   z-index: 1;
@@ -173,29 +173,24 @@ video {
 }
 
 .prize.element .name {
-  text-shadow: none;
+  /* text-shadow: none; */
 }
 
 .prize.element {
   transition: background-color 1.5s ease-in 0.3s;
-  background-color: rgba(253, 105, 0, 0.85) !important;
+  background-color: rgb(0, 127, 127, 0.95) !important;
   background-size: 100% 100%;
   border-radius: 10%;
-  border: .1px solid #F9D598;
-  box-shadow: 0 0 12px #F9D598;
-    /* 调整卡片大小 */
-    width: 60px;  /* 调整宽度 */
-    height: 80px; /* 调整高度 */
+  border: 0.01vh solid rgba(0, 255, 255, 0.5);
+  box-shadow: 0 0 1.2vh rgba(0, 255, 255, 0.5);
 }
 
 .prize.element .name {
-  font-size: 13px;
-  margin-top: 5px;
+  margin-top: 0.5vh;
 }
 
 .prize.element .company {
-  font-size: 12px;
-  margin-top: 8px;
+  margin-top: 0.8vh;
 }
 
 .prize .company,
@@ -204,64 +199,42 @@ video {
 .highlight .company,
 .highlight .name,
 .highlight .details {
-  color: rgba(255, 255, 255, 0.85);
+  /* color: rgba(255, 255, 255, 0.85); */
   /* color: #c82121 */
 
 }
 
-.dan-mu {
-  visibility: hidden;
-  position: fixed;
-  z-index: -1;
-  font-size: 12px;
-  top: 1vh;
-  left: 0;
-  padding: 0 1.2vh;
-  height: 2.2vh;
-  line-height: 2.2vh;
-  border-radius: 1vh;
-  box-sizing: border-box;
-  background-color: rgba(0, 127, 127, 0.37);
-  box-shadow: 0 0 4px rgba(0, 255, 255, 0.5);
-  border: 1px solid rgba(127, 255, 255, 0.25);
-  color: rgba(127, 255, 255, 0.75);
-}
-
-.dan-mu.active {
-  visibility: visible;
-}
 
 #prizeBar {
   position: fixed;
   left: 40%;
-  top: -20px;
+  top: -2.4vh;
   transform: translateX(-50%);
   width: 100%;
-  padding: 10px 0;
+  padding: 1vh 0;
   z-index: 100;
 }
 
 .prize-list {
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 0 2vh;
   display: flex;
   flex-direction: row;
-  gap: 15px;
+  gap: 1.5vh;
   justify-content: space-evenly;
   width: 100%;
-  padding: 0 20px;
   box-sizing: border-box;
 }
 
 .prize-item {
-  padding: 8px 15px;
-  border-radius: 6px;
+  padding: 1vh 2vh;
+  border-radius: 1vh;
   background: rgba(127, 255, 255, 0.1);
   transition: all 0.3s ease;
   flex: 1;
-  /* max-width: 150px;
-  min-width: 40px; */
+  /* max-width: 15vh;
+  min-width: 5vh; */
   height: 5vh;
 }
 
@@ -290,16 +263,16 @@ video {
 }
 
 .prize-title {
-  font-size: 18px;
-  letter-spacing: 2px;
-  padding: 5px;
+  font-size: 3vh;
+  letter-spacing: 0.2vh;
+  padding: 0.5vh;
   writing-mode: horizontal-tb;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: rgba(127, 255, 255, 0.75);
-  text-shadow: 0 0 10px rgba(127, 255, 255, 0.3);
+  text-shadow: 0 0 1vh rgba(127, 255, 255, 0.3);
   text-align: center;
 }
 
@@ -450,45 +423,43 @@ video {
 
 .shine span {
   position: absolute;
-  display: block
+  display: block;
 }
 
 .shine span:nth-child(1) {
   top: 0;
   left: 0;
   width: 100%;
-  height: 2px;
+  height: 0.2vh;
   background: linear-gradient(90deg,transparent,#f9c05e);
-  animation: animate1 1s linear infinite
+  animation: animate1 1s linear infinite;
 }
 
 @keyframes animate1 {
   0% {
-      left: -100%
+    left: -100%
   }
-
   50%,100% {
-      left: 100%
+    left: 100%
   }
 }
 
 .shine span:nth-child(2) {
   top: -100%;
   right: 0;
-  width: 2px;
+  width: 0.2vh;
   height: 100%;
   background: linear-gradient(180deg,transparent,#f9c05e);
   animation: animate2 1s linear infinite;
-  animation-delay: .25s
+  animation-delay: 0.25s;
 }
 
 @keyframes animate2 {
   0% {
-      top: -100%
+    top: -100%
   }
-
   50%,100% {
-      top: 100%
+    top: 100%
   }
 }
 
@@ -496,39 +467,37 @@ video {
   bottom: 0;
   right: 0;
   width: 100%;
-  height: 2px;
+  height: 0.2vh;
   background: linear-gradient(270deg,transparent,#f9c05e);
   animation: animate3 1s linear infinite;
-  animation-delay: .50s
+  animation-delay: 0.5s;
 }
 
 @keyframes animate3 {
   0% {
-      right: -100%
+    right: -100%
   }
-
   50%,100% {
-      right: 100%
+    right: 100%
   }
 }
 
 .shine span:nth-child(4) {
   bottom: -100%;
   left: 0;
-  width: 2px;
+  width: 0.2vh;
   height: 100%;
   background: linear-gradient(360deg,transparent,#f9c05e);
   animation: animate4 1s linear infinite;
-  animation-delay: .75s
+  animation-delay: 0.75s;
 }
 
 @keyframes animate4 {
   0% {
-      bottom: -100%
+    bottom: -100%
   }
-
   50%,100% {
-      bottom: 100%
+    bottom: 100%
   }
 }
 
@@ -539,7 +508,7 @@ video {
 }
 
 .prize-mess {
-  width:calc(20vw - 6vh);
+  width: calc(20vw - 6vh);
   position: fixed;
   top: 20.2vh;
   right: 0.2vh;
@@ -554,7 +523,7 @@ video {
   font-weight: bold;
   color: #f9c05e;
   vertical-align: middle;
-  padding: 0 6px;
+  padding: 0 0.6vh;
 }
 
 .qipao-container {
@@ -570,9 +539,9 @@ video {
   width: 100%;
   padding: 1.8vh 1.4vh;
   line-height: 1.414;
-  margin: 4px 0;
+  margin: 0.4vh 0;
   box-sizing: border-box;
-  font-size: 14px;
+  font-size: 1.4vh;
   background-color: rgba(127, 255, 255, 0.25);
   color: rgba(127, 255, 255, 0.75);
 }
@@ -599,9 +568,7 @@ video {
   color: #fff;
   cursor: pointer;
   background-color: rgba(253, 105, 0, 0.9);
- /* background: url(https://corp-wecom-cdn.elcapp.cn/outlet_test/material/image/20220113/23229171906123500.svg) no-repeat; */
- background-size: 100% 100%;
-  /* border: 1px solid rgba(255, 255, 255, 0.5); */
+  background-size: 100% 100%;
 }
 
 .rotate-active {
@@ -619,12 +586,12 @@ video {
 }
 
 .margin-l-40 {
-  margin-left: 40px;
+  margin-left: 4vh;
 }
 
 #lottery {
   animation: breath 1.6s linear infinite;
-  box-shadow: 0px 0px 15px rgb(127 255 255 / 75%);
+  box-shadow: 0 0 1.5vh rgb(127 255 255 / 75%);
 }
 
 
@@ -632,26 +599,26 @@ video {
 .upload-box {
   position: fixed;
   background: rgba(0, 0, 0, 0.8);
-  border-radius: 8px;
-  padding: 20px;
-  min-width: 300px;
+  border-radius: 1vh;
+  padding: 2vh;
+  min-width: 30vh;
   display: none;
   z-index: 1000;
   color: #fff;
   text-align: center;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(5px);
+  box-shadow: 0 0 2vh rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(0.5vh);
 }
 
 .upload-content h3 {
-  margin: 0 0 10px;
-  font-size: 18px;
+  margin: 0 0 1vh;
+  font-size: 1.8vh;
   color: #fff;
 }
 
 .upload-content p {
-  margin: 0 0 20px;
-  font-size: 14px;
+  margin: 0 0 2vh;
+  font-size: 1.4vh;
   color: rgba(255, 255, 255, 0.7);
 }
 
@@ -659,10 +626,10 @@ video {
   background: rgba(127, 255, 255, 0.25);
   color: rgba(127, 255, 255, 0.75);
   border: none;
-  padding: 10px 20px;
-  border-radius: 4px;
+  padding: 1vh 2vh;
+  border-radius: 0.4vh;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 1.4vh;
   transition: background 0.3s;
 }
 
@@ -676,7 +643,7 @@ video {
 }
 
 .file-input-wrapper {
-  margin: 15px 0;
+  margin: 1.5vh 0;
   text-align: center;
 }
 
@@ -694,9 +661,9 @@ video {
   background: rgba(127, 255, 255, 0.25);
   color: rgba(127, 255, 255, 0.75);
   border: none;
-  padding: 10px 20px;
-  border-radius: 4px;
-  font-size: 14px;
+  padding: 1vh 2vh;
+  border-radius: 0.4vh;
+  font-size: 1.4vh;
   transition: background 0.3s;
 }
 
@@ -712,40 +679,40 @@ video {
 }
 
 .column-selection {
-  margin: 15px 0;
+  margin: 1.5vh 0;
   text-align: left;
 }
 
 .column-selection h4 {
-  margin: 0 0 10px;
-  font-size: 14px;
+  margin: 0 0 1vh;
+  font-size: 1.4vh;
   color: rgba(127, 255, 255, 0.75);
 }
 
 .columns-container {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0.8vh;
 }
 
 .column-item {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 1vh;
 }
 
 .column-item label {
   color: rgba(255, 255, 255, 0.7);
-  font-size: 14px;
+  font-size: 1.4vh;
 }
 
 .column-item select {
   flex: 1;
   background: rgba(127, 255, 255, 0.1);
-  border: 1px solid rgba(127, 255, 255, 0.2);
+  border: 0.1vh solid rgba(127, 255, 255, 0.2);
   color: white;
-  padding: 5px;
-  border-radius: 4px;
+  padding: 0.5vh;
+  border-radius: 0.4vh;
 }
 
 .hidden {
@@ -820,12 +787,12 @@ video {
 .column-tag {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 0.6vh;
   background: rgba(127, 255, 255, 0.15);
   color: rgba(255, 255, 255, 0.9);
-  padding: 4px 10px;
-  border-radius: 4px;
-  font-size: 12px;
+  padding: 0.4vh 1vh;
+  border-radius: 0.4vh;
+  font-size: 1.2vh;
 }
 
 .column-tag .remove-btn {
@@ -838,26 +805,31 @@ video {
   color: rgba(255, 255, 255, 0.9);
 }
 
+.page-btn {
+  position: fixed; 
+  bottom: 100vh;          /* 从 7vh 改为 15vh，按钮位置上移 */
+  left: 50%; 
+  transform: translateX(-50%); 
+  z-index: 1000;
+  display: flex;
+  gap: 1vh;
+  width: auto;
+  justify-content: center;
+}
+
 .page-btn button {
-  margin: 0;
-  padding: 8px 20px;
+  background: rgba(127, 255, 255, 0.25);
+  color: rgba(127, 255, 255, 0.75);
   border: none;
-  border-radius: 4px;
-  background-color: rgba(253, 105, 0, 0.85);
-  color: white;
+  padding: 1vh 2vh;
+  border-radius: 0.4vh;
   cursor: pointer;
-  transition: background-color 0.3s;
-  font-size: 14px;
-  min-width: 80px;
+  font-size: 1.4vh;
+  transition: background 0.3s;
 }
 
 .page-btn button:hover {
-  background-color: rgba(253, 105, 0, 1);
-}
-
-.page-btn button:disabled {
-  background-color: rgba(253, 105, 0, 0.5);
-  cursor: not-allowed;
+  background: rgba(127, 255, 255, 0.35);
 }
 
 .title-input-wrapper {
