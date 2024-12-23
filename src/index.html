@@ -9,14 +9,57 @@
 <html>
 
 <head>
-  <title>年会抽奖</title>
+  <title>抽签</title>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+  <style>
+    #initialLoading {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+      pointer-events: none;
+      visibility: visible;
+      opacity: 1;
+      transition: opacity 0.3s;
+    }
+    
+    .loading-spinner {
+      width: 5vh;
+      height: 5vh;
+      border: 0.5vh solid rgba(127, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: rgba(127, 255, 255, 0.8);
+      animation: spin 1s linear infinite;
+    }
+    
+    .loading-text {
+      margin-top: 2vh;
+      color: rgba(127, 255, 255, 0.8);
+      font-size: 2vh;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
   <!-- <link rel="stylesheet" href="./index.css"> -->
   <!-- <link rel="stylesheet" href="./css/layer.css"> -->
 </head>
 
 <body id="body">
+  <div id="initialLoading">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">资源加载中...</div>
+  </div>
+
   <div class="canvas-box">
     <canvas id="canvas">你的浏览器不支持canvas</canvas>
   </div>

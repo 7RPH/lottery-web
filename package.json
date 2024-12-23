@@ -2,11 +2,14 @@
   "name": "lottery-web",
   "version": "1.0.1",
   "description": "抽奖",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
     "serve": "npm run start",
     "build": "webpack --mode=production --progress --colors",
-    "dev": "webpack-dev-server --config webpack.dev.js --mode=development --progress --colors"
+    "dev": "webpack-dev-server --config webpack.dev.js --mode=development --progress --colors",
+    "electron:dev": "electron .",
+    "electron:build": "npm run build && electron-builder",
+    "dist": "electron-builder"
   },
   "author": "moshang",
   "license": "ISC",
@@ -31,6 +34,31 @@
     "webpack-merge": "^4.2.2"
   },
   "dependencies": {
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8",
     "xlsx": "^0.18.5"
+  },
+  "build": {
+    "appId": "com.lottery.app",
+    "productName": "抽签程序",
+    "directories": {
+      "output": "electron-dist"
+    },
+    "files": [
+      "dist/**/*",
+      "main.js"
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "build/icon.png",
+      "installerHeaderIcon": "build/icon.png"
+    }
   }
 }

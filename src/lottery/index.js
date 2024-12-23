@@ -609,10 +609,10 @@ function exportToExcel() {
     
     // 创建新的工作簿并添加工作表
     const newWb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(newWb, newWs, '抽奖结果');
+    XLSX.utils.book_append_sheet(newWb, newWs, '抽签结果');
     
     // 导出文件
-    XLSX.writeFile(newWb, '抽奖结果.xlsx');
+    XLSX.writeFile(newWb, '抽签结果.xlsx');
     
   } catch (error) {
     alert('导出失败：' + error.message);
@@ -869,7 +869,7 @@ function selectCard(duration = 600) {
     
     // 使用新分配的卡片索引
     Array.from(pageSelectedIndexes).forEach((cardIndex, index) => {
-      changeCard(cardIndex, currentPageLuckys[index]);
+      changeCard(cardIndex, currentPageLuckys[index], true);
       var object = threeDCards[cardIndex];
 
       tweens.push(
@@ -1160,69 +1160,7 @@ function saveMock() {
 
 
 }
-/**
- * 保存上一次的抽奖结果
- */
-function saveData() {
-  if (!currentPrize) {
-    //若奖品抽完，则不再记录数据，但是还是可以进行抽奖
-    return;
-  }
 
-  let type = currentPrize.type,
-    curLucky = basicData.luckyUsers[type] || [];
-
-  curLucky = curLucky.concat(currentLuckys);
-
-  basicData.luckyUsers[type] = curLucky;
-
-  if (currentPrize.count <= curLucky.length) {
-    currentPrizeIndex--;
-
-    if (currentPrizeIndex <= -1) {
-      currentPrizeIndex = 0;
-    }
-    currentPrize = basicData.prizes[currentPrizeIndex];
-  }
-
-  if (currentLuckys.length > 0) {
-    // todo by xc 添加数据保存机制，以免服务器挂掉数据丢失
-    return
-  }
-  return Promise.resolve();
-}
-/**
- * @description: 方法说明....
- * @param {*} type 中奖产品编号
- * @param {*} currentLuckys
- * @return {*}
- * @Date: 2022-01-11 18:29:47
- */
-function setLuckyStore(luckyData, leftUsers) {
-
-  //中奖商品对应人记录
-  // console.log(mockData.luckyData,basicData.luckyUsers);
-  // console.log(Object.keys(mockData.luckyData).includes(type+""),"长度");
-  // mockData.luckyData[type]=[...mockData.luckyData[type],...currentLuckys]
-  // console.log( mockData.luckyData);
-  localStorage.setItem("luckyData", luckyData)
-  //leftuser 用户抽奖池
-  // const idList=currentLuckys.map(item=>item[0])
-  // mockData.leftUsers=mockData.leftUsers.filter(item=>{
-  //   return  !idList.includes(item[0])
-  // })
-  // console.log(mockData.leftUsers,basicData.leftUsers);
-  localStorage.setItem("leftUsers", leftUsers)
-
-}
-
-function getLuckyStore() {
-  const luckyData = JSON.parse(localStorage.getItem("luckyData"));
-  const leftUsers = JSON.parse(localStorage.getItem("leftUsers"));
-  basicData.luckyData = luckyData;
-  basicData.leftUsers = leftUsers;
-  console.log(basicData.luckyData, basicData.leftUsers);
-}
 
 function changePrize() {
   let luckys = basicData.luckyUsers[currentPrize.type];
@@ -1249,11 +1187,12 @@ function random(num) {
 //     user[1]
 //   }</div><div class="details">${user[0]}<br/>${user[2] || "PSST"}</div>`;
 // }
-function changeCard(cardIndex, user) {
+function changeCard(cardIndex, user, showIndex = false) {
   let card = threeDCards[cardIndex].element;
+  let index = showIndex ? getRandomResult(user) : COMPANY;
   const nameDom = `<div class="name">${user[1]
     }</div>`
-  const companyDom = `<div class="company">${COMPANY}</div>`
+  const companyDom = `<div class="company">${index}</div>`;
   card.innerHTML = nameDom + (COMPANY ? companyDom : '');
 }
 
@@ -1391,53 +1330,45 @@ function replaceMusic(scenes) {
 let onload = window.onload;
 
 window.onload = function () {
-  onload && onload();
-
-  let music = document.querySelector("#music");
-  console.log(music);
-  let rotated = 0,
-    stopAnimate = false,
-    musicBox = document.querySelector("#musicBox");
-
-  function animate() {
-    requestAnimationFrame(function () {
-      if (stopAnimate) {
-        return;
+  // 清理可能存在的残留动画和卡片
+  function cleanupPreviousState() {
+    // 清理 Three.js 场景
+    if (scene) {
+      while(scene.children.length > 0) { 
+        scene.remove(scene.children[0]); 
       }
-      rotated = rotated % 360;
-      musicBox.style.transform = "rotate(" + rotated + "deg)";
-      rotated += 1;
-      animate();
-    });
+    }
+    
+    // 重置相关数组和变量
+    threeDCards = [];
+    targets.table = [];
+    targets.sphere = [];
+    
+    // 清除可能存在的动画
+    TWEEN.removeAll();
   }
 
-  musicBox.addEventListener(
-    "click",
-    function (e) {
-      if (music.paused) {
-        music.play().then(
-          () => {
-            stopAnimate = false;
-            animate();
-          },
-          () => {
-            addQipao("背景音乐自动播放失败，请手动播放！");
-          }
-        );
+  // 检查所有资源是否加载完成
+  Promise.all([
+    new Promise(resolve => {
+      if (document.readyState === 'complete') {
+        resolve();
       } else {
-        music.pause();
-        stopAnimate = true;
+        window.addEventListener('load', resolve);
       }
-    },
-    false
-  );
-
-  setTimeout(function () {
-
-    replaceMusic("enter-BGM")
-    // musicBox.click();
-  }, 2000);
-  initCanvas();
+    }),
+    new Promise(resolve => {
+      cleanupPreviousState(); // 在初始化前清理
+      initAll();
+      resolve();
+    })
+  ]).then(() => {
+    const loading = document.getElementById('initialLoading');
+    loading.style.opacity = '0';
+    setTimeout(() => {
+      loading.style.display = 'none';
+    }, 300); // 等待淡出动画完成后再隐藏
+  });
 };
 
 // 预览Excel文件，获取列名
