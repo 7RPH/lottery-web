@@ -66,10 +66,6 @@ module.exports = {
         to: "./css"
       },
       {
-        from: "./src/data",
-        to: "./data"
-      },
-      {
         from: "./src/img",
         to: "./img"
       },
