@@ -15,7 +15,14 @@ function createWindow () {
   win.loadFile('dist/index.html')
   
   // 开发时可以打开开发者工具
-  // win.webContents.openDevTools()
+  win.webContents.openDevTools()
+  // 监听窗口关闭事件
+  win.on('close', () => {
+    // 在窗口关闭前清除 localStorage
+    win.webContents.executeJavaScript(`
+      localStorage.clear();
+    `);
+  });
 }
 
 app.whenReady().then(() => {

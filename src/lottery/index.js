@@ -505,17 +505,6 @@ uploadExcel.addEventListener('click', async () => {
           lottery();
         });
         break;
-      // 导出抽奖结果
-      case "save":
-        saveMock().then(res => {
-          resetCard().then(res => {
-            // 将之前的记录置空
-            currentLuckys = [];
-          });
-          exportData();
-          addQipao(`数据已保存到EXCEL中。`);
-        });
-        break;
 
       case "result":
         saveMock().then(res => {
@@ -869,7 +858,7 @@ function selectCard(duration = 600) {
     
     // 使用新分配的卡片索引
     Array.from(pageSelectedIndexes).forEach((cardIndex, index) => {
-      changeCard(cardIndex, currentPageLuckys[index], true);
+      changeCard(cardIndex, currentPageLuckys[index], startIndex + index + 1);
       var object = threeDCards[cardIndex];
 
       tweens.push(
@@ -1071,7 +1060,7 @@ function lottery() {
       leftCount = basicData.leftUsers.length,
       leftPrizeCount = currentPrize.count - (luckyData ? luckyData.length : 0);
     
-    const cloneLeftUsers = JSON.parse(JSON.stringify(basicData.leftUsers));
+    const cloneLeftUsers = basicData.leftUsers;
     
     if (leftCount === 0) {
       addQipao("已抽签完毕，现在重新设置所有人员可以进行二次抽签！");
@@ -1189,7 +1178,7 @@ function random(num) {
 // }
 function changeCard(cardIndex, user, showIndex = false) {
   let card = threeDCards[cardIndex].element;
-  let index = showIndex ? getRandomResult(user) : COMPANY;
+  let index = showIndex ? showIndex : COMPANY;
   const nameDom = `<div class="name">${user[1]
     }</div>`
   const companyDom = `<div class="company">${index}</div>`;
@@ -1232,60 +1221,6 @@ function shineCard() {
   }, 500);
 }
 
-function setData(type, data) {
-  return new Promise((resolve, reject) => {
-    window.AJAX({
-      url: "/saveData",
-      data: {
-        type,
-        data
-      },
-      success() {
-        resolve();
-      },
-      error() {
-        reject();
-      }
-    });
-  });
-}
-
-function setErrorData(data) {
-  return new Promise((resolve, reject) => {
-    window.AJAX({
-      url: "/errorData",
-      data: {
-        data
-      },
-      success() {
-        resolve();
-      },
-      error() {
-        reject();
-      }
-    });
-  });
-}
-
-function exportData() {
-  window.AJAX({
-    url: "/export",
-    success(data) {
-      if (data.type === "success") {
-        location.href = data.url;
-      }
-    }
-  });
-}
-
-function reset() {
-  window.AJAX({
-    url: "/reset",
-    success(data) {
-      console.log("重置成功");
-    }
-  });
-}
 function resetMock() {
   localStorage.clear();
   location.reload()
