@@ -60,7 +60,7 @@ let selectedCardIndex = [],
 
 let currentPage = 0; // 添加全局变量，记录当前页码
 
-initAll();
+// initAll();
 
 /**
  * 初始化所有DOM
@@ -115,7 +115,7 @@ function startMock() {
     currentPrize = basicData.prizes[currentPrizeIndex];
     break;
   }
-  console.error(currentPrizeIndex, currentPrize);
+  // console.error(currentPrizeIndex, currentPrize);
   showPrizeList(currentPrizeIndex);
   let curLucks = basicData.luckyUsers[currentPrize.type];
   setPrizeData(currentPrizeIndex, curLucks ? curLucks.length : 0, true);
@@ -139,7 +139,7 @@ function startMock() {
 
 function initCards() {
   let member = basicData.users;
-  console.log("initCards", member);
+  // console.log("initCards", member);
   // 添加保护性检查
   if (!Array.isArray(member)) {
     return;
@@ -405,7 +405,7 @@ function bindEvent() {
       }
 
       //骇客
-      console.log(currentPrize);
+      // console.log(currentPrize);
 
 
     }
@@ -461,39 +461,41 @@ function bindEvent() {
         break;
       // 抽奖
       case "lottery":
-
-        //更新状态
         isLotting = true;
-        // 每次抽奖前先保存上一次的抽奖数据
-        // saveData();
-        //feat@把保存移除到roll点以后执行 
-        saveMock()
-        //feat@是否还有礼物
-        if (!currentPrizeIndex) {
-          addQipao(`没有可以抽取的奖品了`);
-
-          let doREset = window.confirm(
-            "抽签已经结束,是否重新抽签？"
-          );
-          if (!doREset) {
-            return;
-          } else {
-            document.getElementById("reLottery").click()
-          }
-
-
-          return
-        }
-        replaceMusic(currentPrize.enter)
-        mockData.setSecret(currentPrize, basicData)
-        //更新剩余抽奖数目的数据显示
-        changePrize();
+        // 重新抽奖则直接进行抽取，不对上一次的抽奖数据进行保存
+        // 抽奖
         resetCard().then(res => {
           // 抽奖
           lottery();
-        })
-        addQipao(`正在抽取[${currentPrize.title}],调整好姿势`);
+        });
         break;
+        // if (localStorage.getItem("randomResult")) {
+        //   addQipao(`没有可以抽取的奖品了`);
+        //   window.alert(
+        //     "抽签已经结束,如果需要重新抽签，请点击重新抽签按钮"
+        //   );
+        //   isLotting = false;  // 重置抽奖状态
+        //   return;  // 使用return而不是break
+        // }
+        // console.log("hereeeeeeeee");
+        // // 每次抽奖前先保存上一次的抽奖数据
+        // // saveData();
+        // //feat@把保存移除到roll点以后执行 
+        // saveMock()
+        // //feat@是否还有礼物
+
+        // //更新状态
+        // isLotting = true;
+        // replaceMusic(currentPrize.enter)
+        // mockData.setSecret(currentPrize, basicData)
+        // //更新剩余抽奖数目的数据显示
+        // changePrize();
+        // resetCard().then(res => {
+        //   // 抽奖
+        //   lottery();
+        // })
+        // addQipao(`正在抽取[${currentPrize.title}],调整好姿势`);
+        // break;
       // 重新抽奖
       case "reLottery":
         if (currentLuckys.length === 0) {
@@ -610,7 +612,7 @@ function exportToExcel() {
 
   } catch (error) {
     alert('导出失败：' + error.message);
-    console.error('导出错误:', error);
+    // console.error('导出错误:', error);
   }
 }
 
@@ -758,7 +760,7 @@ function transform(targets, duration) {
 //旋转地球
 function rotateBall() {
   return new Promise((resolve, reject) => {
-    console.log(Math.PI);
+    // console.log(Math.PI);
     scene.rotation.y = 0;
     new TWEEN.Tween(scene.rotation)
       .to(
@@ -1109,7 +1111,7 @@ function lotteryRan(number, time) {
     const j = Math.floor(Math.random() * (i + 1));
     [arr[i], arr[j]] = [arr[j], arr[i]]; // 交换元素
   }
-  console.log(arr.slice(0, time));
+  // console.log(arr.slice(0, time));
   localStorage.setItem("randomResult", JSON.stringify(arr.slice(0, time)));
   // 返回前 time 个元素
   return arr.slice(0, time);
@@ -1138,7 +1140,7 @@ function saveMock() {
   basicData.luckyUsers[type] = curLucky;
 
   //feat@把roll点的人员池子功能迁移到此处
-  console.log(curLucky.map(item => item[0]), "幸运用户");
+  // console.log(curLucky.map(item => item[0]), "幸运用户");
   basicData.leftUsers = basicData.leftUsers.filter(human => !curLucky.map(item => item[0]).includes(human[0]))
 
   //奖品树小于等于幸运用户数,商品抽满了
@@ -1324,10 +1326,10 @@ async function previewExcel(file) {
     reader.onload = (e) => {
       try {
         const data = e.target.result;
-        console.log('File data:', data); // 调试日志
+        // console.log('File data:', data); // 调试日志
 
         const workbook = XLSX.read(data, { type: 'array' });
-        console.log('Workbook:', workbook); // 调试日志
+        // console.log('Workbook:', workbook); // 调试日志
 
         const firstSheetName = workbook.SheetNames[0];
         if (!firstSheetName) {
@@ -1342,7 +1344,7 @@ async function previewExcel(file) {
         }
 
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-        console.log('Parsed data:', jsonData); // 调试日志
+        // console.log('Parsed data:', jsonData); // 调试日志
 
         if (!jsonData || jsonData.length === 0) {
           reject(new Error('Excel文件为空'));
@@ -1359,13 +1361,13 @@ async function previewExcel(file) {
 
         resolve(columns);
       } catch (error) {
-        console.error('Excel解析错误:', error); // 调试日志
+        // console.error('Excel解析错误:', error); // 调试日志
         reject(new Error(`Excel文件解析失败: ${error.message}`));
       }
     };
 
     reader.onerror = (error) => {
-      console.error('文件读取错误:', error); // 调试日志
+      // console.error('文件读取错误:', error); // 调试日志
       reject(new Error('文件读取失败'));
     };
 
