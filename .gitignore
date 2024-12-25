@@ -1,5 +1,6 @@
 #npm
 node_modules/
 dist/
+electron-dist/
 temp.json
 error.json

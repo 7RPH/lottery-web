@@ -8,7 +8,7 @@
     "build": "webpack --mode=production --progress --colors",
     "dev": "webpack-dev-server --config webpack.dev.js --mode=development --progress --colors",
     "electron:dev": "electron .",
-    "electron:build": "npm run build && electron-builder",
+    "electron:build": "npm run build && electron-builder --win --x64",
     "dist": "electron-builder"
   },
   "author": "moshang",
@@ -31,11 +31,12 @@
     "webpack": "^4.41.4",
     "webpack-cli": "^3.3.10",
     "webpack-dev-server": "^3.10.1",
-    "webpack-merge": "^4.2.2"
+    "webpack-merge": "^4.2.2",
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8"
   },
   "dependencies": {
-    "electron": "^33.2.1",
-    "electron-builder": "^25.1.8",
+
     "xlsx": "^0.18.5"
   },
   "build": {
