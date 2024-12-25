@@ -440,7 +440,7 @@ function bindEvent() {
       // 重置
       case "reset":
         let doREset = window.confirm(
-          "是否确认重置数据，重置后，当前已抽的奖项全部清空？"
+          "是否确认重置数据，重置后，当前已设置的数据全部清空？"
         );
         if (!doREset) {
           return;
