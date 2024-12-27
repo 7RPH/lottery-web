@@ -814,7 +814,9 @@ function selectCard(duration = 600) {
 
   // 先重置所有卡片位置
   return resetCardPositions().then(() => {
-    let width = 70,
+    // 将 vh 转换为像素
+    const vh = window.innerHeight / 100; // 1vh 的像素值
+    let width = 8 * vh, // 8vh 转换为像素
       tag = -(displayCount - 1) / 2,
       locates = [];
 
@@ -822,8 +824,8 @@ function selectCard(duration = 600) {
     const ROW_MAX_COUNT = 10;
     if (displayCount > ROW_MAX_COUNT) {
       const rows = Math.ceil(displayCount / ROW_MAX_COUNT);
-      const yGap = 300 / (rows - 1);
-      const startY = 90 * (rows - 1) / 2;
+      const yGap = 40 * vh / (rows - 1); // 30vh 转换为像素
+      const startY = 12 * (rows - 1) / 2 * vh; // 转换为像素
 
       for (let row = 0; row < rows; row++) {
         const countInRow = Math.min(ROW_MAX_COUNT, displayCount - row * ROW_MAX_COUNT);
@@ -832,7 +834,7 @@ function selectCard(duration = 600) {
         for (let col = 0; col < countInRow; col++) {
           locates.push({
             x: (startX + col) * width * 2,
-            y: (startY - row * yGap) * 2 - 50
+            y: (startY - row * yGap) * 2 - 5 * vh // 转换为像素
           });
         }
       }
@@ -840,7 +842,7 @@ function selectCard(duration = 600) {
       for (let i = 0; i < displayCount; i++) {
         locates.push({
           x: tag * width * 2,
-          y: -50
+          y: -5 * vh // 转换为像素
         });
         tag++;
       }
