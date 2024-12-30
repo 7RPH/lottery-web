@@ -1,6 +1,6 @@
 {
-  "name": "lottery-web",
-  "version": "1.0.1",
+  "name": "lotteryb",
+  "version": "1.0.3",
   "description": "lottery",
   "main": "main.js",
   "scripts": {
@@ -11,7 +11,7 @@
     "electron:build": "npm run build && electron-builder",
     "dist": "electron-builder"
   },
-  "author": "moshang",
+  "author": "author",
   "license": "ISC",
   "devDependencies": {
     "autoprefixer": "^8.1.0",
