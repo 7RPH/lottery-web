@@ -8,7 +8,7 @@
     "build": "webpack --mode=production --progress --colors",
     "dev": "webpack-dev-server --config webpack.dev.js --mode=development --progress --colors",
     "electron:dev": "electron .",
-    "electron:build": "npm run build && electron-builder --win --x64",
+    "electron:build": "npm run build && electron-builder",
     "dist": "electron-builder"
   },
   "author": "moshang",
