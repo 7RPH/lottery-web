@@ -1,7 +1,7 @@
 {
   "name": "lottery-web",
   "version": "1.0.1",
-  "description": "抽奖",
+  "description": "lottery",
   "main": "main.js",
   "scripts": {
     "serve": "npm run start",
@@ -41,7 +41,7 @@
   },
   "build": {
     "appId": "com.lottery.app",
-    "productName": "抽签程序",
+    "productName": "lottery",
     "directories": {
       "output": "electron-dist"
     },
