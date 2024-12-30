@@ -74,9 +74,9 @@ a {
 
 .element {
   margin-top: -2vh;
-  width:12vh;
+  width:6vw;
   height: 15vh;
-  box-shadow: 0 0 12px rgba(0, 255, 255, 0.5);
+  box-shadow: 0 0 1.2vh rgba(0, 255, 255, 0.5);
   /* border: 1px solid rgba(249, 192, 94); */
   text-align: center;
   cursor: default;
@@ -98,7 +98,7 @@ a {
 }
 
 .element .name {
-  margin: 0 10px;
+  margin: 0 1vh;
   position: absolute;
   top: 4.6vh;
   left: 0;

@@ -145,15 +145,17 @@ function initCards() {
     return;
   }
   let showCards = [],
-    length = member.length;
+    length = member.length,
+    vh = window.innerHeight / 100,
+    vw = window.innerWidth / 100;
 
   let isBold = false,
     showTable = basicData.leftUsers.length === basicData.users.length,
     index = 0,
     totalMember = member.length,
     position = {
-      x: (140 * COLUMN_COUNT - 20) / 2,
-      y: (180 * ROW_COUNT - 20) / 2
+      x: (8 * COLUMN_COUNT - 7) / 2 * vw,
+      y: (16 * ROW_COUNT - 2) / 2 * vh
     };
 
   camera = new THREE.PerspectiveCamera(
@@ -185,8 +187,8 @@ function initCards() {
       threeDCards.push(object);
 
       var object = new THREE.Object3D();
-      object.position.x = j * 140 - position.x;
-      object.position.y = -(i * 180) + position.y;
+      object.position.x = j * 8 * vw - position.x;
+      object.position.y = -(i * 18 * vh) + position.y;
       targets.table.push(object);
       index++;
     }
@@ -834,6 +836,7 @@ function selectCard(duration = 600) {
 
   // 计算新的位置
   const vh = window.innerHeight / 100;
+  const vw = window.innerWidth / 100;
   let width = 8 * vh,
     tag = -(displayCount - 1) / 2,
     locates = [];
@@ -895,7 +898,7 @@ function selectCard(duration = 600) {
           .to({
             x: locates[index].x,
             y: locates[index].y,
-            z: 1700
+            z: 1000
           }, Math.random() * duration + duration)
           .easing(TWEEN.Easing.Exponential.InOut)
       );
@@ -914,7 +917,7 @@ function selectCard(duration = 600) {
       showPrize = false;
       object.position.x = locates[index].x;
       object.position.y = locates[index].y;
-      object.position.z = 1700;
+      object.position.z = 1000;
       object.rotation.x = 0;
       object.rotation.y = 0;
       object.rotation.z = 0;

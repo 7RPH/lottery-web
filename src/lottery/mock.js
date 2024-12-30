@@ -174,7 +174,7 @@ const atmosphereGroupCard = () => `rgba(${rgba},${opacity()})`
 const background = ""
 //背景动态壁纸模式 不用时可以设置为null或者注释
 // const bgVideo="//game.gtimg.cn/images/lol/act/a20220121lunarpass/bg.mp4"
-const width = window.innerWidth * .75
+const width = window.innerWidth * 1.2
 const height = window.innerWidth * .75 * .75
 /**
  * 一次抽取的奖品个数与prizes对应
