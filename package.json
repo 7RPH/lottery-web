@@ -56,9 +56,7 @@
     },
     "nsis": {
       "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "installerIcon": "build/icon.png",
-      "installerHeaderIcon": "build/icon.png"
+      "allowToChangeInstallationDirectory": true
     }
   }
 }
