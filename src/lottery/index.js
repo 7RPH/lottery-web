@@ -29,7 +29,7 @@ let TOTAL_CARDS,
   COMPANY,
   HIGHLIGHT_CELL = [],
   // 当前的比例
-  Resolution = 1;
+  Resolution = window.devicePixelRatio || 1;
 
 let camera,
   scene,
@@ -164,7 +164,7 @@ function initCards() {
     1,
     10000
   );
-  camera.position.z = 3000;
+  camera.position.z = 1500 * Resolution;
 
   scene = new THREE.Scene();
 
@@ -202,7 +202,7 @@ function initCards() {
     var phi = Math.acos(-1 + (2 * i) / l);
     var theta = Math.sqrt(l * Math.PI) * phi;
     var object = new THREE.Object3D();
-    object.position.setFromSphericalCoords(800 * Resolution, phi, theta);
+    object.position.setFromSphericalCoords(400 * Resolution, phi, theta);
     vector.copy(object.position).multiplyScalar(2);
     object.lookAt(vector);
     targets.sphere.push(object);
@@ -898,7 +898,7 @@ function selectCard(duration = 600) {
           .to({
             x: locates[index].x,
             y: locates[index].y,
-            z: 1000
+            z: 1700
           }, Math.random() * duration + duration)
           .easing(TWEEN.Easing.Exponential.InOut)
       );
@@ -917,7 +917,7 @@ function selectCard(duration = 600) {
       showPrize = false;
       object.position.x = locates[index].x;
       object.position.y = locates[index].y;
-      object.position.z = 1000;
+      object.position.z = 1700;
       object.rotation.x = 0;
       object.rotation.y = 0;
       object.rotation.z = 0;
