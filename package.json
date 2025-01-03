@@ -1,6 +1,6 @@
 {
-  "name": "lotteryb",
-  "version": "1.0.3",
+  "name": "lottery",
+  "version": "1.0.4",
   "description": "lottery",
   "main": "main.js",
   "scripts": {
