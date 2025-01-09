@@ -685,7 +685,7 @@ video {
 }
 
 .column-item label {
-  color: rgba(127, 255, 255, 0.25);
+  color: rgba(127, 255, 255, 0.75);
   font-size: 1.4vh;
 }
 
@@ -696,6 +696,11 @@ video {
   color: rgba(127, 255, 255, 0.75);
   padding: 0.5vh;
   border-radius: 0.4vh;
+}
+
+.column-item select option {
+  background-color: rgba(127, 255, 255, 0.1); /* 设置下拉选项的背景颜色 */
+  color: rgba(127, 255, 255, 0.75); /* 设置下拉选项的文本颜色 */
 }
 
 .hidden {
