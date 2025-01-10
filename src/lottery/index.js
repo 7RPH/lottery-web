@@ -603,15 +603,27 @@ function exportToExcel() {
       return newRow;
     });
 
+    // 排序
+    exportData.sort((a, b) => {
+      return a[customColumns[0]] - b[customColumns[0]]; // 根据新增列值进行升序排序
+    });
+    // 补0
+    let maxDigits = String(exportData.length - 1).length;
+    exportData.map((row) =>{
+      customColumns.forEach(customColumn => {
+        row[customColumn] = String(row[customColumn]).padStart(maxDigits, '0');
+      });
+    })
+
     // 创建新的工作表
-    const newWs = XLSX.utils.json_to_sheet(exportData);
+    const newWs = XLSX.utils.json_to_sheet(exportData, {header: [...originColumns, ...customColumns]});
 
     // 创建新的工作簿并添加工作表
     const newWb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(newWb, newWs, '抽签结果');
 
     // 导出文件
-    XLSX.writeFile(newWb, '抽签结果.xlsx');
+    XLSX.writeFile(newWb, localStorage.getItem('title') + '_抽签结果.xlsx');
 
   } catch (error) {
     alert('导出失败：' + error.message);
@@ -1388,7 +1400,8 @@ function random(num) {
 // }
 function changeCard(cardIndex, user, showIndex = false) {
   let card = threeDCards[cardIndex].element;
-  let index = showIndex ? showIndex : COMPANY;
+  let maxDigits = String(threeDCards.length).length;
+  let index = showIndex ? String(showIndex).padStart(maxDigits, '0') : COMPANY;
   const nameDom = `<div class="name">${user[1]
     }</div>`
   const companyDom = `<div class="company">${index}</div>`;
