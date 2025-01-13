@@ -869,9 +869,11 @@ function selectCard(duration = 600) {
   const ROW_MAX_COUNT = 10;
   if (displayCount > ROW_MAX_COUNT) {
     const rows = Math.ceil(displayCount / ROW_MAX_COUNT);
-    const yGap = 40 * vh / (rows - 1); // 30vh 转换为像素
-    const startY = 12 * (rows - 1) / 2 * vh; // 转换为像素
-
+    const maxYGap = 20 * vh; // 设置最大行间距
+    const yGap = Math.min(40 * vh / (rows - 1), maxYGap); // 计算行间距，避免除以零并限制最大间距
+    // const yGap = 40 * vh / (rows - 1); // 30vh 转换为像素
+    const startY =  yGap * (rows - 1) / 2; // 转换为像素
+    // 设置坐标，TWEEN坐标原点在屏幕中心，从左往右x增加，从上到下y减少
     for (let row = 0; row < rows; row++) {
       const countInRow = Math.min(ROW_MAX_COUNT, displayCount - row * ROW_MAX_COUNT);
       const startX = -(countInRow - 1) / 2;
@@ -879,7 +881,7 @@ function selectCard(duration = 600) {
       for (let col = 0; col < countInRow; col++) {
         locates.push({
           x: (startX + col) * width * 2,
-          y: (startY - row * yGap) * 2 - 5 * vh // 转换为像素
+          y: (startY - row * yGap) * 2 + 5 * vh // 转换为像素
         });
       }
     }
