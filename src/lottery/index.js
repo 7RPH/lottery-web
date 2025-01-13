@@ -616,14 +616,26 @@ function exportToExcel() {
     })
 
     // 创建新的工作表
-    const newWs = XLSX.utils.json_to_sheet(exportData, {header: [...originColumns, ...customColumns]});
+    // const newWs = XLSX.utils.json_to_sheet(exportData, {header: [...originColumns, ...customColumns]});
+    const newWs = XLSX.utils.aoa_to_sheet([]); // 创建一个空的工作表
 
+    // 在工作表的第一行插入标题
+    const title = localStorage.getItem('title'); // 你想要的标题
+    const titleRow = Array(originColumns.length + customColumns.length).fill(title); // 创建一个标题行，长度与列数相同
+    XLSX.utils.sheet_add_aoa(newWs, [titleRow], { origin: "A1" });
+    // 合并标题单元格
+    if (!newWs['!merges']) newWs['!merges'] = [];
+    newWs['!merges'].push({
+      s: { r: 0, c: 0 }, // 起始单元格（第一行第一列）
+      e: { r: 0, c: originColumns.length + customColumns.length - 1 } // 结束单元格（第一行最后一列）
+    });
+    XLSX.utils.sheet_add_json(newWs, exportData, { header: [...originColumns, ...customColumns], origin: "A2" });
     // 创建新的工作簿并添加工作表
     const newWb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(newWb, newWs, '抽签结果');
+    XLSX.utils.book_append_sheet(newWb, newWs);
 
     // 导出文件
-    XLSX.writeFile(newWb, localStorage.getItem('title') + '_抽签结果.xlsx');
+    XLSX.writeFile(newWb, title + '.xlsx');
 
   } catch (error) {
     alert('导出失败：' + error.message);
