@@ -29,7 +29,11 @@ let TOTAL_CARDS,
   COMPANY,
   HIGHLIGHT_CELL = [],
   // 当前的比例
-  Resolution = window.devicePixelRatio || 1;
+  Resolution = window.devicePixelRatio || 1,
+  currentTween = null,
+  isRotating = false,
+  isFirstRotation = true,
+  enumNum = 0;
 
 let camera,
   scene,
@@ -241,6 +245,8 @@ function bindEvent() {
   const addColumnBtn = document.getElementById('addColumn');
   const customColumnsList = document.getElementById('customColumns');
   const customColumns = new Set(); // 存储自定义列名
+  const enumNumInput = document.getElementById('enum');
+  const startNumInput = document.getElementById('startNumber');
 
   let isBoxVisible = false;
   // 文件选择处理
@@ -259,14 +265,17 @@ function bindEvent() {
 
     fileName.textContent = file.name;
     document.querySelector('.title-input-wrapper').classList.remove('hidden');
-
+    // document.querySelector('.enum-input-wrapper').classList.remove('hidden');
+    // document.querySelector('.start-input-wrapper').classList.remove('hidden');
     try {
       // 预览Excel文件，获取列名
       const columns = await previewExcel(file);
 
       // 清空之前的选项
       columnsContainer.innerHTML = '';
-
+      // 设置默认值
+      enumNumInput.value = localStorage.getItem("count");
+      startNumInput.value = 1;
       // 创建单个列选择
       const item = document.createElement('div');
       item.className = 'column-item';
@@ -298,6 +307,9 @@ function bindEvent() {
   uploadExcel.addEventListener('click', async () => {
     const file = fileInput.files[0];
     if (!file) return;
+    // 获取用户设置数据
+    localStorage.setItem("enumCount", enumNumInput.value);
+    localStorage.setItem("start", startNumInput.value);
 
     // 获取用户选择的列
     const selectedColumn = document.querySelector('select[name="dataColumn"]').value;
@@ -349,7 +361,7 @@ function bindEvent() {
 
     requestAnimationFrame(() => {
       uploadBox.style.transition = 'all 0.3s ease-out';
-      uploadBox.style.transform = 'translate(-50%, -120%) scale(1)';
+      uploadBox.style.transform = 'translate(-50%, -105%) scale(1)';
       uploadBox.style.opacity = '1';
     });
 
@@ -463,14 +475,30 @@ function bindEvent() {
         break;
       // 抽奖
       case "lottery":
-        isLotting = true;
-        showPrize = true;
-        // 重新抽奖则直接进行抽取，不对上一次的抽奖数据进行保存
-        // 抽奖
-        resetCard().then(res => {
+        // isLotting = true;
+        // showPrize = true;
+        // // 重新抽奖则直接进行抽取，不对上一次的抽奖数据进行保存
+        // // 抽奖
+        // resetCard().then(res => {
+        //   // 抽奖
+        //   lottery();
+        // });
+        if (isRotating) {
+          isLotting = true;
+          showPrize = true;
+          // 重新抽奖则直接进行抽取，不对上一次的抽奖数据进行保存
+          // 抽奖
+          // resetCard().then(res => {
+          e.target.textContent = "抽签";
           // 抽奖
           lottery();
-        });
+          // });
+        } else {
+          resetCard().then(res => {
+            e.target.textContent = "停止";
+            rotateBallInfinitely();
+          });
+        }
         break;
         // if (localStorage.getItem("randomResult")) {
         //   addQipao(`没有可以抽取的奖品了`);
@@ -662,8 +690,9 @@ function getPrizeName(row) {
 // 获取抽签结果
 function getRandomResult(index) {
   const arr = JSON.parse(localStorage.getItem("randomResult"));
+  const append = parseInt(localStorage.getItem("start"));
   // console.log(arr, index);
-  return arr.indexOf(index) + 1; // 生成1-100的随机数
+  return arr.indexOf(index) + append;
 }
 
 //场景转换
@@ -705,7 +734,7 @@ function createCard(user, isBold, id, showTable) {
     element.className = "element lightitem";
 
     if (showTable) {
-      element.classList.add("highlight");
+      // element.classList.add("highlight");
     }
     //feat@刷新后不显示默认背景色
     element.style.backgroundColor = mockData.atmosphereGroupCard()
@@ -731,7 +760,7 @@ function removeHighlight() {
 
 function addHighlight() {
   document.querySelectorAll(".lightitem").forEach(node => {
-    node.classList.add("highlight");
+    // node.classList.add("highlight");
   });
 }
 
@@ -804,6 +833,64 @@ function rotateBall() {
       });
   });
 }
+
+// 无限旋转
+function rotateBallInfinitely() {
+  isRotating = true;
+
+  // 定义单次旋转动画
+  const rotateOnce = () => {
+    const targetRotation = scene.rotation.y + Math.PI * 2; // 旋转一圈
+    
+    // 创建动画实例
+    const tween = new TWEEN.Tween(scene.rotation)
+      .to({ y: targetRotation }, ROTATE_TIME)
+      .onUpdate(render)
+      .onComplete(() => {
+        if (isRotating) {
+          currentTween = rotateOnce().start(); // 继续下一圈
+        }
+      });
+
+    // 首次旋转使用加速缓动，后续保持线性速度
+    if (isFirstRotation) {
+      tween.easing(TWEEN.Easing.Exponential.In); // 加速缓动
+      isFirstRotation = false;
+    } else {
+      tween.easing(TWEEN.Easing.Linear.None); // 匀速缓动
+    }
+
+    return tween;
+  };
+
+  // 启动首次旋转
+  currentTween = rotateOnce().start();
+}
+
+// 停止旋转
+function stopRotateBall() {
+  return new Promise((resolve, reject) =>{
+    isRotating = false;
+    isFirstRotation = true;
+    const currentRotationY = scene.rotation.y;
+    if (currentTween) {
+        new TWEEN.Tween(scene.rotation)
+        .to({ y: Math.round(currentRotationY / (2 * Math.PI)) * (2 * Math.PI) }, ROTATE_TIME) // 在 500ms 内保持当前位置
+        .easing(TWEEN.Easing.Exponential.Out)
+        .onUpdate(render)
+        .start()
+        .onComplete(() => {
+          // 动画完成后，确保 rotation.y 为 0
+          scene.rotation.y = 0;
+          resolve();
+        });
+        // .start();
+    }
+    
+  })
+  
+}
+
 
 function onWindowResize() {
   camera.aspect = mockData.width / mockData.height;
@@ -1021,157 +1108,159 @@ function selectCard(duration = 600) {
   }
 }
 
-// function selectCard(duration = 600) {
-//   rotate = false;
+function selectCardWithAnimate(duration = 600) {
+  rotate = false;
 
-//   const PER_PAGE = 50; // 每页显示数量
-//   const totalPages = Math.ceil(currentLuckys.length / PER_PAGE);
+  const PER_PAGE = 50; // 每页显示数量
+  const totalPages = Math.ceil(currentLuckys.length / PER_PAGE);
 
-//   // 获取当前页的数据
-//   const startIndex = currentPage * PER_PAGE;
-//   const displayCount = Math.min(PER_PAGE, currentLuckys.length - startIndex);
-//   const currentPageLuckys = currentLuckys.slice(startIndex, startIndex + displayCount);
+  // 获取当前页的数据
+  const startIndex = currentPage * PER_PAGE;
+  const displayCount = Math.min(PER_PAGE, currentLuckys.length - startIndex);
+  const currentPageLuckys = currentLuckys.slice(startIndex, startIndex + displayCount);
 
-//   // 先重置所有卡片位置
-//   return resetCardPositions().then(() => {
-//     // 将 vh 转换为像素
-//     const vh = window.innerHeight / 100; // 1vh 的像素值
-//     let width = 8 * vh, // 8vh 转换为像素
-//       tag = -(displayCount - 1) / 2,
-//       locates = [];
+  // 先重置所有卡片位置
+  return resetCardPositions().then(() => {
+    // 将 vh 转换为像素
+    const vh = window.innerHeight / 100; // 1vh 的像素值
+    let width = 8 * vh, // 8vh 转换为像素
+      tag = -(displayCount - 1) / 2,
+      locates = [];
 
-//     // 计算位置信息，每行最多显示10个
-//     const ROW_MAX_COUNT = 10;
-//     if (displayCount > ROW_MAX_COUNT) {
-//       const rows = Math.ceil(displayCount / ROW_MAX_COUNT);
-//       const yGap = 40 * vh / (rows - 1); // 30vh 转换为像素
-//       const startY = 12 * (rows - 1) / 2 * vh; // 转换为像素
+    // 计算位置信息，每行最多显示10个
+    const ROW_MAX_COUNT = 10;
+    if (displayCount > ROW_MAX_COUNT) {
+      const rows = Math.ceil(displayCount / ROW_MAX_COUNT);
+      const maxYGap = 20 * vh; // 设置最大行间距
+      const yGap = Math.min(40 * vh / (rows - 1), maxYGap); // 计算行间距，避免除以零并限制最大间距
+      // const yGap = 40 * vh / (rows - 1); // 30vh 转换为像素
+      const startY =  yGap * (rows - 1) / 2; // 转换为像素
+      // 设置坐标，TWEEN坐标原点在屏幕中心，从左往右x增加，从上到下y减少
+      for (let row = 0; row < rows; row++) {
+        const countInRow = Math.min(ROW_MAX_COUNT, displayCount - row * ROW_MAX_COUNT);
+        const startX = -(countInRow - 1) / 2;
 
-//       for (let row = 0; row < rows; row++) {
-//         const countInRow = Math.min(ROW_MAX_COUNT, displayCount - row * ROW_MAX_COUNT);
-//         const startX = -(countInRow - 1) / 2;
+        for (let col = 0; col < countInRow; col++) {
+          locates.push({
+            x: (startX + col) * width * 2,
+            y: (startY - row * yGap) * 2 + 5 * vh // 转换为像素
+          });
+        }
+      }
+    } else {
+      for (let i = 0; i < displayCount; i++) {
+        locates.push({
+          x: tag * width * 2,
+          y: -5 * vh // 转换为像素
+        });
+        tag++;
+      }
+    }
 
-//         for (let col = 0; col < countInRow; col++) {
-//           locates.push({
-//             x: (startX + col) * width * 2,
-//             y: (startY - row * yGap) * 2 - 5 * vh // 转换为像素
-//           });
-//         }
-//       }
-//     } else {
-//       for (let i = 0; i < displayCount; i++) {
-//         locates.push({
-//           x: tag * width * 2,
-//           y: -5 * vh // 转换为像素
-//         });
-//         tag++;
-//       }
-//     }
+    // 显示分页信息
+    let pageInfo = `第${currentPage + 1}/${totalPages}页`;
+    let text = currentPageLuckys.map(item => item[1]);
+    addQipao(`恭喜${text.join("、")}获得${currentPrize.title}${totalPages > 1 ? '，' + pageInfo : ''}`);
 
-//     // 显示分页信息
-//     let pageInfo = `第${currentPage + 1}/${totalPages}页`;
-//     let text = currentPageLuckys.map(item => item[1]);
-//     addQipao(`恭喜${text.join("、")}获得${currentPrize.title}${totalPages > 1 ? '，' + pageInfo : ''}`);
+    const tweens = [];
+    const totalCards = ROW_COUNT * COLUMN_COUNT;
 
-//     const tweens = [];
-//     const totalCards = ROW_COUNT * COLUMN_COUNT;
+    // 为当前页重新分配卡片索引
+    const pageSelectedIndexes = new Set();
+    while (pageSelectedIndexes.size < displayCount) {
+      const cardIndex = random(totalCards);
+      if (!pageSelectedIndexes.has(cardIndex)) {
+        pageSelectedIndexes.add(cardIndex);
+      }
+    }
 
-//     // 为当前页重新分配卡片索引
-//     const pageSelectedIndexes = new Set();
-//     while (pageSelectedIndexes.size < displayCount) {
-//       const cardIndex = random(totalCards);
-//       if (!pageSelectedIndexes.has(cardIndex)) {
-//         pageSelectedIndexes.add(cardIndex);
-//       }
-//     }
+    // 使用新分配的卡片索引
+    Array.from(pageSelectedIndexes).forEach((cardIndex, index) => {
+      changeCard(cardIndex, currentPageLuckys[index], startIndex + index + 1);
+      var object = threeDCards[cardIndex];
 
-//     // 使用新分配的卡片索引
-//     Array.from(pageSelectedIndexes).forEach((cardIndex, index) => {
-//       changeCard(cardIndex, currentPageLuckys[index], startIndex + index + 1);
-//       var object = threeDCards[cardIndex];
+      tweens.push(
+        new TWEEN.Tween(object.position)
+          .to({
+            x: locates[index].x,
+            y: locates[index].y,
+            z: 1400 / Resolution
+          }, Math.random() * duration + duration)
+          .easing(TWEEN.Easing.Exponential.InOut)
+      );
 
-//       tweens.push(
-//         new TWEEN.Tween(object.position)
-//           .to({
-//             x: locates[index].x,
-//             y: locates[index].y,
-//             z: 1700
-//           }, Math.random() * duration + duration)
-//           .easing(TWEEN.Easing.Exponential.InOut)
-//       );
+      tweens.push(
+        new TWEEN.Tween(object.rotation)
+          .to({
+            x: 0,
+            y: 0,
+            z: 0
+          }, Math.random() * duration + duration)
+          .easing(TWEEN.Easing.Exponential.InOut)
+      );
 
-//       tweens.push(
-//         new TWEEN.Tween(object.rotation)
-//           .to({
-//             x: 0,
-//             y: 0,
-//             z: 0
-//           }, Math.random() * duration + duration)
-//           .easing(TWEEN.Easing.Exponential.InOut)
-//       );
+      object.element.classList.add("prize");
+    });
 
-//       object.element.classList.add("prize");
-//     });
+    tweens.forEach(tween => tween.start());
 
-//     tweens.forEach(tween => tween.start());
+    return new Promise((resolve) => {
+      new TWEEN.Tween(this)
+        .to({}, duration * 2)
+        .onUpdate(render)
+        .start()
+        .onComplete(() => {
+          isLotting = false;
 
-//     return new Promise((resolve) => {
-//       new TWEEN.Tween(this)
-//         .to({}, duration * 2)
-//         .onUpdate(render)
-//         .start()
-//         .onComplete(() => {
-//           isLotting = false;
+          // 添加翻页按钮
+          if (totalPages > 1) {
+            const prevBtn = document.createElement('button');
+            prevBtn.textContent = '上一页';
+            prevBtn.style.display = currentPage > 0 ? 'inline-block' : 'none';
+            prevBtn.onclick = () => {
+              if (currentPage > 0) {
+                currentPage--;
+                selectCardWithAnimate(duration);
+              }
+            };
 
-//           // 添加翻页按钮
-//           if (totalPages > 1) {
-//             const prevBtn = document.createElement('button');
-//             prevBtn.textContent = '上一页';
-//             prevBtn.style.display = currentPage > 0 ? 'inline-block' : 'none';
-//             prevBtn.onclick = () => {
-//               if (currentPage > 0) {
-//                 currentPage--;
-//                 selectCard(duration);
-//               }
-//             };
+            const nextBtn = document.createElement('button');
+            nextBtn.textContent = '下一页';
+            nextBtn.style.display = currentPage < totalPages - 1 ? 'inline-block' : 'none';
+            nextBtn.onclick = () => {
+              if (currentPage < totalPages - 1) {
+                currentPage++;
+                selectCardWithAnimate(duration);
+              }
+            };
 
-//             const nextBtn = document.createElement('button');
-//             nextBtn.textContent = '下一页';
-//             nextBtn.style.display = currentPage < totalPages - 1 ? 'inline-block' : 'none';
-//             nextBtn.onclick = () => {
-//               if (currentPage < totalPages - 1) {
-//                 currentPage++;
-//                 selectCard(duration);
-//               }
-//             };
+            // 移除旧的按钮
+            const oldBtns = document.querySelectorAll('.page-btn');
+            oldBtns.forEach(btn => btn.remove());
 
-//             // 移除旧的按钮
-//             const oldBtns = document.querySelectorAll('.page-btn');
-//             oldBtns.forEach(btn => btn.remove());
-
-//             // 添加新按钮
-//             const btnContainer = document.createElement('div');
-//             btnContainer.style.cssText = `
-//               position: fixed; 
-//               bottom: 11vh;
-//               left: 50%; 
-//               transform: translateX(-50%); 
-//               z-index: 1000;
-//               display: flex;
-//               gap: 1vh;
-//               width: auto;
-//               justify-content: center;
-//             `;
-//             btnContainer.classList.add('page-btn');
-//             btnContainer.appendChild(prevBtn);
-//             btnContainer.appendChild(nextBtn);
-//             document.body.appendChild(btnContainer);
-//           }
-//           resolve();
-//         });
-//     });
-//   });
-// }
+            // 添加新按钮
+            const btnContainer = document.createElement('div');
+            btnContainer.style.cssText = `
+              position: fixed; 
+              bottom: 11vh;
+              left: 50%; 
+              transform: translateX(-50%); 
+              z-index: 1000;
+              display: flex;
+              gap: 1vh;
+              width: auto;
+              justify-content: center;
+            `;
+            btnContainer.classList.add('page-btn');
+            btnContainer.appendChild(prevBtn);
+            btnContainer.appendChild(nextBtn);
+            document.body.appendChild(btnContainer);
+          }
+          resolve();
+        });
+    });
+  });
+}
 
 // 添加新函数：重置卡片位置
 function resetCardPositions(duration = 500) {
@@ -1287,7 +1376,7 @@ function resetCard(duration = 500) {
  * 抽奖
  */
 function lottery() {
-  rotateBall().then(() => {
+  stopRotateBall().then(() => {
     currentLuckys = [];
     selectedCardIndex = [];
 
@@ -1414,8 +1503,9 @@ function random(num) {
 // }
 function changeCard(cardIndex, user, showIndex = false) {
   let card = threeDCards[cardIndex].element;
-  let maxDigits = String(threeDCards.length).length;
-  let index = showIndex ? String(showIndex).padStart(maxDigits, '0') : COMPANY;
+  let startNumber = parseInt(localStorage.getItem("start"));
+  let maxDigits = String(basicData.users.length + startNumber).length;
+  let index = showIndex ? String(showIndex + startNumber - 1).padStart(maxDigits, '0') : COMPANY;
   const nameDom = `<div class="name">${user[1]
     }</div>`
   const companyDom = `<div class="company">${index}</div>`;

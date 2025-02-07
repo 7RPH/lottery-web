@@ -101,8 +101,8 @@ const prizes = [
     img: "./img/huawei.png",
     enter: "1st-lottery",//抽奖进行时音乐
     awards: "1st-BJ-BGM",//颁奖音乐
-    ROTATE_TIME: 20000,
-    circle: 8 * 6
+    // ROTATE_TIME: 20000,
+    // circle: 8 * 6
 
   // },
   // {
