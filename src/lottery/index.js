@@ -692,7 +692,7 @@ function getRandomResult(index) {
   const arr = JSON.parse(localStorage.getItem("randomResult"));
   const append = parseInt(localStorage.getItem("start"));
   // console.log(arr, index);
-  return arr.indexOf(index) + append;
+  return arr[index] + append - 1;
 }
 
 //场景转换
@@ -1001,7 +1001,7 @@ function selectCard(duration = 600) {
 
   // 使用新分配的卡片索引
   Array.from(pageSelectedIndexes).forEach((cardIndex, index) => {
-    changeCard(cardIndex, currentPageLuckys[index], startIndex + index + 1);
+    changeCard(cardIndex, currentPageLuckys[index], true);
     var object = threeDCards[cardIndex];
 
     if (currentPage === 0 && showPrize === true) {
@@ -1176,7 +1176,7 @@ function selectCardWithAnimate(duration = 600) {
 
     // 使用新分配的卡片索引
     Array.from(pageSelectedIndexes).forEach((cardIndex, index) => {
-      changeCard(cardIndex, currentPageLuckys[index], startIndex + index + 1);
+      changeCard(cardIndex, currentPageLuckys[index], true);
       var object = threeDCards[cardIndex];
 
       tweens.push(
@@ -1380,7 +1380,8 @@ function lottery() {
     currentLuckys = [];
     selectedCardIndex = [];
 
-    let perCount = EACH_COUNT[currentPrizeIndex],
+    // let perCount = EACH_COUNT[currentPrizeIndex],
+    let perCount = parseInt(localStorage.getItem("enumCount")),
       luckyData = basicData.luckyUsers[currentPrize.type],
       leftCount = basicData.leftUsers.length,
       leftPrizeCount = currentPrize.count - (luckyData ? luckyData.length : 0);
@@ -1392,15 +1393,17 @@ function lottery() {
       basicData.leftUsers = basicData.users;
       leftCount = basicData.leftUsers.length;
     }
-    currentLuckys = lotteryRan(leftCount, perCount).map(index => {
+    currentLuckys = lotteryRan(leftCount, perCount).map((value, index) => {
+      cloneLeftUsers[index][2] = value;
       return cloneLeftUsers[index];
     });
-
+    currentLuckys.sort((a, b) => a[2] - b[2]);
+    console.log(currentLuckys)
     // 随机选择要展示的卡片
     const totalCards = ROW_COUNT * COLUMN_COUNT;
     const usedIndexes = new Set();
 
-    for (let i = 0; i < Math.min(perCount, totalCards); i++) {
+    for (let i = 0; i < Math.min(EACH_COUNT[currentPrizeIndex], totalCards); i++) {
       let cardIndex;
       do {
         cardIndex = random(totalCards);
@@ -1414,19 +1417,49 @@ function lottery() {
   });
 }
 
-function lotteryRan(number, time) {
-  // 创建一个包含从 0 到 number - 1 的数组
-  let arr = Array.from({ length: number }, (_, i) => i);
+function lotteryRan(dataLength, signCount) {
+  if (signCount >= dataLength) {
+    // 生成1到signCount的数组并洗牌，然后截取前dataLength个元素
+    let arr = Array.from({ length: signCount }, (_, i) => i + 1);
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    localStorage.setItem("randomResult", JSON.stringify(arr.slice(0, dataLength)));
+    return arr.slice(0, dataLength);
+} else {
+    // 计算每个签号的出现次数
+    const q = Math.floor(dataLength / signCount);
+    const r = dataLength % signCount;
+    let arr = [];
+    // 填充前r个签号，每个出现q+1次
+    for (let i = 1; i <= r; i++) {
+        arr.push(...Array(q + 1).fill(i));
+    }
+    // 填充剩余签号，每个出现q次
+    for (let i = r + 1; i <= signCount; i++) {
+        arr.push(...Array(q).fill(i));
+    }
+    // 洗牌数组
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    localStorage.setItem("randomResult", JSON.stringify(arr));
+    return arr;
+}
+  // // 创建一个包含从 0 到 number - 1 的数组
+  // let arr = Array.from({ length: number }, (_, i) => i);
 
-  // 洗牌数组
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]]; // 交换元素
-  }
-  // console.log(arr.slice(0, time));
-  localStorage.setItem("randomResult", JSON.stringify(arr.slice(0, time)));
-  // 返回前 time 个元素
-  return arr.slice(0, time);
+  // // 洗牌数组
+  // for (let i = arr.length - 1; i > 0; i--) {
+  //   const j = Math.floor(Math.random() * (i + 1));
+  //   [arr[i], arr[j]] = [arr[j], arr[i]]; // 交换元素
+  // }
+  // // console.log(arr.slice(0, time));
+  // localStorage.setItem("randomResult", JSON.stringify(arr.slice(0, time)));
+  // // 返回前 time 个元素
+  // return arr.slice(0, time);
 }
 // lotteryRa(30,5)
 
@@ -1505,7 +1538,7 @@ function changeCard(cardIndex, user, showIndex = false) {
   let card = threeDCards[cardIndex].element;
   let startNumber = parseInt(localStorage.getItem("start"));
   let maxDigits = String(basicData.users.length + startNumber).length;
-  let index = showIndex ? String(showIndex + startNumber - 1).padStart(maxDigits, '0') : COMPANY;
+  let index = showIndex ? String(user[2] + startNumber - 1).padStart(maxDigits, '0') : COMPANY;
   const nameDom = `<div class="name">${user[1]
     }</div>`
   const companyDom = `<div class="company">${index}</div>`;
