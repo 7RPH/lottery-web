@@ -636,7 +636,10 @@ function exportToExcel() {
       return a[customColumns[0]] - b[customColumns[0]]; // 根据新增列值进行升序排序
     });
     // 补0
-    let maxDigits = String(exportData.length - 1).length;
+    let startNumber = parseInt(localStorage.getItem("start"));
+    let signCount = parseInt(localStorage.getItem("enumCount"));
+    let maxDigits = String(signCount + startNumber).length;
+    // let maxDigits = String(exportData.length - 1).length;
     exportData.map((row) =>{
       customColumns.forEach(customColumn => {
         row[customColumn] = String(row[customColumn]).padStart(maxDigits, '0');
@@ -1537,7 +1540,8 @@ function random(num) {
 function changeCard(cardIndex, user, showIndex = false) {
   let card = threeDCards[cardIndex].element;
   let startNumber = parseInt(localStorage.getItem("start"));
-  let maxDigits = String(basicData.users.length + startNumber).length;
+  let signCount = parseInt(localStorage.getItem("enumCount"));
+  let maxDigits = String(signCount + startNumber).length;
   let index = showIndex ? String(user[2] + startNumber - 1).padStart(maxDigits, '0') : COMPANY;
   const nameDom = `<div class="name">${user[1]
     }</div>`
