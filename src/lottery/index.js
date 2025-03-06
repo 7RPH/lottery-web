@@ -10,7 +10,8 @@ import {
 } from "./prizeList";
 import { NUMBER_MATRIX } from "./config.js";
 import mockData, { parseExcelWithMapping } from "./mock";
-import * as XLSX from 'xlsx';
+// import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 
 let ROTATE_TIME = 1000;
 const BASE_HEIGHT = 1080;
@@ -604,6 +605,7 @@ function bindEvent() {
   exportButton.addEventListener('click', exportToExcel);
 }
 
+
 function exportToExcel() {
   try {
     // 读取原始Excel文件
@@ -633,46 +635,158 @@ function exportToExcel() {
 
     // 排序
     exportData.sort((a, b) => {
-      return a[customColumns[0]] - b[customColumns[0]]; // 根据新增列值进行升序排序
+      return a[customColumns[0]] - b[customColumns[0]]; 
     });
+    
     // 补0
     let startNumber = parseInt(localStorage.getItem("start"));
     let signCount = parseInt(localStorage.getItem("enumCount"));
+    let title = localStorage.getItem("title");
     let maxDigits = String(signCount + startNumber).length;
-    // let maxDigits = String(exportData.length - 1).length;
-    exportData.map((row) =>{
+    exportData.forEach((row) => {
       customColumns.forEach(customColumn => {
         row[customColumn] = String(row[customColumn]).padStart(maxDigits, '0');
       });
-    })
-
-    // 创建新的工作表
-    // const newWs = XLSX.utils.json_to_sheet(exportData, {header: [...originColumns, ...customColumns]});
-    const newWs = XLSX.utils.aoa_to_sheet([]); // 创建一个空的工作表
-
-    // 在工作表的第一行插入标题
-    const title = localStorage.getItem('title'); // 你想要的标题
-    const titleRow = Array(originColumns.length + customColumns.length).fill(title); // 创建一个标题行，长度与列数相同
-    XLSX.utils.sheet_add_aoa(newWs, [titleRow], { origin: "A1" });
-    // 合并标题单元格
-    if (!newWs['!merges']) newWs['!merges'] = [];
-    newWs['!merges'].push({
-      s: { r: 0, c: 0 }, // 起始单元格（第一行第一列）
-      e: { r: 0, c: originColumns.length + customColumns.length - 1 } // 结束单元格（第一行最后一列）
     });
-    XLSX.utils.sheet_add_json(newWs, exportData, { header: [...originColumns, ...customColumns], origin: "A2" });
-    // 创建新的工作簿并添加工作表
-    const newWb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(newWb, newWs);
+
+    // 创建新的 ExcelJS 工作簿
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet(title);
+    const headers = [...originColumns, ...customColumns];
+    let nowCell = worksheet.getCell("A1");
+    worksheet.mergeCells(1, 1, 1, headers.length)
+    // 添加表头
+    nowCell.value = title;
+    // nowCell.alignment = {vertical: "middle", horizontal: "center"};
+    worksheet.addRow(headers);
+
+    // 添加数据
+    exportData.forEach(row => {
+      const rowData = headers.map(col => row[col] || '');
+      worksheet.addRow(rowData);
+    });
+
+    // 样式设置
+    worksheet.eachRow((row, rowNumber) =>{
+      row.font = {name: '仿宋_GB2312', size: 14, bold: false}
+      row.font.size = rowNumber > 1? 14:18;
+      row.font.bold = rowNumber > 2? false:true;
+      if (rowNumber > 1) {
+        row.eachCell((cell) => {
+          cell.border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' }
+          };
+        });
+      }
+    })
+    worksheet.columns.forEach(column => {
+      const lengths = column.values.map(v => {
+        const str = v.toString();
+        let length = 0;
+        for (let char of str) {
+          // 判断字符是否为中文
+          if (/[\u4e00-\u9fa5]/.test(char)) {
+            length += 2; // 中文字符宽度为2
+          } else {
+            length += 1; // 英文字符宽度为1
+          }
+        }
+        return length;
+      });
+      const maxLength = Math.max(...lengths.filter(v => typeof v === 'number')) + 10;
+      column.width = maxLength;
+      column.alignment = {vertical: "middle", horizontal: "center"};
+    });
 
     // 导出文件
-    XLSX.writeFile(newWb, title + '.xlsx');
+    workbook.xlsx.writeBuffer().then(buffer => {
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = title + '.xlsx';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
 
   } catch (error) {
-    alert('导出失败：' + error.message);
-    // console.error('导出错误:', error);
+    alert('导出失败: ' + error.message);
   }
 }
+// function exportToExcel() {
+//   try {
+//     // 读取原始Excel文件
+//     let originalData = JSON.parse(localStorage.getItem("excelData"));
+//     if (!originalData) {
+//       alert('没有找到原始数据，请重新上传Excel文件');
+//       return;
+//     }
+
+//     // 获取列名
+//     const originColumns = originalData.shift();
+//     const customColumns = JSON.parse(localStorage.getItem("customColumns"));
+
+//     // 为每行数据添加自定义列和随机值
+//     const exportData = originalData.map((row, index) => {
+//       const newRow = {};
+//       for (let i = 0; i < originColumns.length; i++) {
+//         newRow[originColumns[i]] = row[i];
+//       }
+//       // 添加自定义列
+//       customColumns.forEach((colName) => {
+//         newRow[colName] = getRandomResult(index);
+//       });
+
+//       return newRow;
+//     });
+
+//     // 排序
+//     exportData.sort((a, b) => {
+//       return a[customColumns[0]] - b[customColumns[0]]; // 根据新增列值进行升序排序
+//     });
+//     // 补0
+//     let startNumber = parseInt(localStorage.getItem("start"));
+//     let signCount = parseInt(localStorage.getItem("enumCount"));
+//     let maxDigits = String(signCount + startNumber).length;
+//     // let maxDigits = String(exportData.length - 1).length;
+//     exportData.map((row) =>{
+//       customColumns.forEach(customColumn => {
+//         row[customColumn] = String(row[customColumn]).padStart(maxDigits, '0');
+//       });
+//     })
+
+//     // 创建新的工作表
+//     // const newWs = XLSX.utils.json_to_sheet(exportData, {header: [...originColumns, ...customColumns]});
+//     const newWs = XLSX.utils.aoa_to_sheet([]); // 创建一个空的工作表
+
+//     // 在工作表的第一行插入标题
+//     const title = localStorage.getItem('title'); // 你想要的标题
+//     const titleRow = Array(originColumns.length + customColumns.length).fill(title); // 创建一个标题行，长度与列数相同
+//     XLSX.utils.sheet_add_aoa(newWs, [titleRow], { origin: "A1" });
+//     // 合并标题单元格
+//     if (!newWs['!merges']) newWs['!merges'] = [];
+//     newWs['!merges'].push({
+//       s: { r: 0, c: 0 }, // 起始单元格（第一行第一列）
+//       e: { r: 0, c: originColumns.length + customColumns.length - 1 } // 结束单元格（第一行最后一列）
+//     });
+//     XLSX.utils.sheet_add_json(newWs, exportData, { header: [...originColumns, ...customColumns], origin: "A2" });
+//     // 创建新的工作簿并添加工作表
+//     const newWb = XLSX.utils.book_new();
+//     XLSX.utils.book_append_sheet(newWb, newWs);
+
+//     // 导出文件
+//     XLSX.writeFile(newWb, title + '.xlsx');
+
+//   } catch (error) {
+//     alert('导出失败：' + error.message);
+//     // console.error('导出错误:', error);
+//   }
+// }
 
 // 获取用户中奖的奖项名称
 function getPrizeName(row) {
@@ -1670,58 +1784,115 @@ window.onload = function () {
   });
 };
 
+
 // 预览Excel文件，获取列名
 async function previewExcel(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
         const data = e.target.result;
-        // console.log('File data:', data); // 调试日志
-
-        const workbook = XLSX.read(data, { type: 'array' });
-        // console.log('Workbook:', workbook); // 调试日志
-
-        const firstSheetName = workbook.SheetNames[0];
-        if (!firstSheetName) {
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.load(data);
+        
+        // 获取第一个工作表
+        const worksheet = workbook.worksheets[0];
+        if (!worksheet) {
           reject(new Error('Excel文件没有工作表'));
           return;
         }
-
-        const worksheet = workbook.Sheets[firstSheetName];
-        if (!worksheet) {
-          reject(new Error('无法读取工作表数据'));
-          return;
-        }
-
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-        // console.log('Parsed data:', jsonData); // 调试日志
-
-        if (!jsonData || jsonData.length === 0) {
+        
+        // 读取数据到数组
+        const jsonData = [];
+        worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+          const rowData = [];
+          row.eachCell({ includeEmpty: true }, (cell) => {
+            rowData.push(cell.value);
+          });
+          jsonData.push(rowData);
+        });
+        
+        if (jsonData.length === 0) {
           reject(new Error('Excel文件为空'));
           return;
         }
+        
         localStorage.setItem("excelData", JSON.stringify(jsonData));
+        
         // 获取第一行作为列名
         const columns = jsonData[0];
         localStorage.setItem("count", jsonData.length - 1);
+        
         if (!columns || columns.length === 0) {
           reject(new Error('未找到列名'));
           return;
         }
-
+        
         resolve(columns);
       } catch (error) {
-        // console.error('Excel解析错误:', error); // 调试日志
         reject(new Error(`Excel文件解析失败: ${error.message}`));
       }
     };
-
-    reader.onerror = (error) => {
-      // console.error('文件读取错误:', error); // 调试日志
+    
+    reader.onerror = () => {
       reject(new Error('文件读取失败'));
     };
-
+    
     reader.readAsArrayBuffer(file);
   });
 }
+// // 预览Excel文件，获取列名
+// async function previewExcel(file) {
+//   return new Promise((resolve, reject) => {
+//     const reader = new FileReader();
+//     reader.onload = (e) => {
+//       try {
+//         const data = e.target.result;
+//         // console.log('File data:', data); // 调试日志
+
+//         const workbook = XLSX.read(data, { type: 'array' });
+//         // console.log('Workbook:', workbook); // 调试日志
+
+//         const firstSheetName = workbook.SheetNames[0];
+//         if (!firstSheetName) {
+//           reject(new Error('Excel文件没有工作表'));
+//           return;
+//         }
+
+//         const worksheet = workbook.Sheets[firstSheetName];
+//         if (!worksheet) {
+//           reject(new Error('无法读取工作表数据'));
+//           return;
+//         }
+
+//         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+//         // console.log('Parsed data:', jsonData); // 调试日志
+
+//         if (!jsonData || jsonData.length === 0) {
+//           reject(new Error('Excel文件为空'));
+//           return;
+//         }
+//         localStorage.setItem("excelData", JSON.stringify(jsonData));
+//         // 获取第一行作为列名
+//         const columns = jsonData[0];
+//         localStorage.setItem("count", jsonData.length - 1);
+//         if (!columns || columns.length === 0) {
+//           reject(new Error('未找到列名'));
+//           return;
+//         }
+
+//         resolve(columns);
+//       } catch (error) {
+//         // console.error('Excel解析错误:', error); // 调试日志
+//         reject(new Error(`Excel文件解析失败: ${error.message}`));
+//       }
+//     };
+
+//     reader.onerror = (error) => {
+//       // console.error('文件读取错误:', error); // 调试日志
+//       reject(new Error('文件读取失败'));
+//     };
+
+//     reader.readAsArrayBuffer(file);
+//   });
+// }

@@ -5,7 +5,8 @@
  * @LastEditTime: 2022-06-21 18:34:34
  * @LastEditors: Gavin
  */
-import * as XLSX from 'xlsx';
+// import * as XLSX from 'xlsx';
+import ExcelJS from "exceljs"
 
 // 默认数据，当没有上传 Excel 时使用
 const defaultData = [
@@ -14,55 +15,55 @@ const defaultData = [
 
 let currentData = [...defaultData];
 
-// 解析 Excel 文件
-export function parseExcel(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
+// // 解析 Excel 文件
+// export function parseExcel(file) {
+//   return new Promise((resolve, reject) => {
+//     const reader = new FileReader();
     
-    reader.onload = (e) => {
-      try {
-        const data = e.target.result;
-        const workbook = XLSX.read(data, { type: 'array' });
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
+//     reader.onload = (e) => {
+//       try {
+//         const data = e.target.result;
+//         const workbook = XLSX.read(data, { type: 'array' });
+//         const firstSheetName = workbook.SheetNames[0];
+//         const worksheet = workbook.Sheets[firstSheetName];
         
-        // 将 Excel 数据转换为数组
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+//         // 将 Excel 数据转换为数组
+//         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
         
-        // 过滤掉空行和处理数据格式
-        const processedData = jsonData
-          .filter(row => row.length >= 3 && row[0] && row[1] && row[2])
-          .map(row => [
-            String(row[0]), // 工号
-            String(row[1]), // 姓名
-            String(row[2])  // 部门
-          ]);
+//         // 过滤掉空行和处理数据格式
+//         const processedData = jsonData
+//           .filter(row => row.length >= 3 && row[0] && row[1] && row[2])
+//           .map(row => [
+//             String(row[0]), // 工号
+//             String(row[1]), // 姓名
+//             String(row[2])  // 部门
+//           ]);
 
-        if (processedData.length === 0) {
-          reject(new Error('Excel 文件中没有有效数据'));
-          return;
-        }
+//         if (processedData.length === 0) {
+//           reject(new Error('Excel 文件中没有有效数据'));
+//           return;
+//         }
 
-        // 更新当前数据
-        currentData = processedData;
-        let storeData = getUsers();
-        console.log('上传excel更新数据', storeData);
-        localStorage.setItem("allUser", JSON.stringify(storeData));
-        localStorage.setItem("leftUsers", JSON.stringify(storeData));
-        // console.log(currentData);
-        resolve(processedData);
-      } catch (error) {
-        reject(new Error('Excel 文件解析失败: ' + error.message));
-      }
-    };
+//         // 更新当前数据
+//         currentData = processedData;
+//         let storeData = getUsers();
+//         console.log('上传excel更新数据', storeData);
+//         localStorage.setItem("allUser", JSON.stringify(storeData));
+//         localStorage.setItem("leftUsers", JSON.stringify(storeData));
+//         // console.log(currentData);
+//         resolve(processedData);
+//       } catch (error) {
+//         reject(new Error('Excel 文件解析失败: ' + error.message));
+//       }
+//     };
 
-    reader.onerror = () => {
-      reject(new Error('文件读取失败'));
-    };
+//     reader.onerror = () => {
+//       reject(new Error('文件读取失败'));
+//     };
 
-    reader.readAsArrayBuffer(file);
-  });
-}
+//     reader.readAsArrayBuffer(file);
+//   });
+// }
 
 function randomsort(a, b) {
   return Math.random() > .5 ? -1 : 1;
@@ -185,34 +186,47 @@ export function parseExcelWithMapping(file, selectedColumn) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
         const data = e.target.result;
-        const workbook = XLSX.read(data, { type: 'array' });
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.load(data);
         
-        // 将 Excel 数据转换为数组
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        // 获取第一个工作表
+        const worksheet = workbook.worksheets[0];
+        if (!worksheet) {
+          reject(new Error('Excel文件没有工作表'));
+          return;
+        }
         
-        // 过滤掉空行并只保留选中的列
-        const processedData = jsonData
-          .slice(1) // 跳过表头
-          .filter(row => row[selectedColumn])
-          .map(row => [
-            String(row[selectedColumn]), // 选中的列
-            String(row[selectedColumn]), // 重复一次作为显示名称
-            "未分组" // 默认分组
-          ]);
-
+        // 读取数据并处理
+        const processedData = [];
+        let isFirstRow = true;
+        
+        worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+          // 跳过表头
+          if (isFirstRow) {
+            isFirstRow = false;
+            return;
+          }
+          
+          const cellValue = row.getCell(parseInt(selectedColumn) + 1).value;
+          if (cellValue) {
+            processedData.push([
+              String(cellValue), // 选中的列
+              String(cellValue), // 重复一次作为显示名称
+              "未分组" // 默认分组
+            ]);
+          }
+        });
+        
         if (processedData.length === 0) {
           reject(new Error('Excel 文件中没有有效数据'));
           return;
         }
-
+        
         // 更新当前数据
         currentData = processedData;
-        // let storeData = getUsers();
         localStorage.setItem("allUser", JSON.stringify(processedData));
         localStorage.setItem("leftUsers", JSON.stringify(processedData));
         
@@ -221,13 +235,62 @@ export function parseExcelWithMapping(file, selectedColumn) {
         reject(new Error('Excel 文件解析失败: ' + error.message));
       }
     };
-
+    
     reader.onerror = () => {
       reject(new Error('文件读取失败'));
     };
-
+    
     reader.readAsArrayBuffer(file);
   });
 }
+
+// export function parseExcelWithMapping(file, selectedColumn) {
+//   return new Promise((resolve, reject) => {
+//     const reader = new FileReader();
+    
+//     reader.onload = (e) => {
+//       try {
+//         const data = e.target.result;
+//         const workbook = XLSX.read(data, { type: 'array' });
+//         const firstSheetName = workbook.SheetNames[0];
+//         const worksheet = workbook.Sheets[firstSheetName];
+        
+//         // 将 Excel 数据转换为数组
+//         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        
+//         // 过滤掉空行并只保留选中的列
+//         const processedData = jsonData
+//           .slice(1) // 跳过表头
+//           .filter(row => row[selectedColumn])
+//           .map(row => [
+//             String(row[selectedColumn]), // 选中的列
+//             String(row[selectedColumn]), // 重复一次作为显示名称
+//             "未分组" // 默认分组
+//           ]);
+
+//         if (processedData.length === 0) {
+//           reject(new Error('Excel 文件中没有有效数据'));
+//           return;
+//         }
+
+//         // 更新当前数据
+//         currentData = processedData;
+//         // let storeData = getUsers();
+//         localStorage.setItem("allUser", JSON.stringify(processedData));
+//         localStorage.setItem("leftUsers", JSON.stringify(processedData));
+        
+//         resolve(processedData);
+//       } catch (error) {
+//         reject(new Error('Excel 文件解析失败: ' + error.message));
+//       }
+//     };
+
+//     reader.onerror = () => {
+//       reject(new Error('文件读取失败'));
+//     };
+
+//     reader.readAsArrayBuffer(file);
+//   });
+// }
 
 export default { EACH_COUNT, prizes, COMPANY, getUsers, luckyData, leftUsers, awardList, excludeUser, atmosphereGroupCard, background, setSecret, width, height }
