@@ -1534,6 +1534,31 @@ function lottery() {
   });
 }
 
+
+function lotteryRanApi(dataLength, signCount){
+  return fetch('http://localhost:3000/api/test', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      'dataLength': dataLength,
+      'signCount': signCount,
+      'fileName': excelFilePath
+    })
+})
+    .then(response => response.json())
+    .then(data => {
+        console.log(' POST 响应数据:', data['res']);
+        localStorage.setItem("randomResult", JSON.stringify(data['res']));
+        return Promise.resolve();
+    })
+    .catch(error => {
+        return Promise.reject(error);
+    });
+  // return Promise.resolve();
+}
+
 function lotteryRan(dataLength, signCount) {
   if (signCount >= dataLength) {
     // 生成1到signCount的数组并洗牌，然后截取前dataLength个元素
