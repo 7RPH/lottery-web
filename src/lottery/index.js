@@ -964,7 +964,7 @@ function exportToPDF(headers, data, title) {
   // 添加文档标题
   pdf.setFont('FSGB2312', 'bold');
   pdf.setFontSize(18); // 与Excel标题字体大小一致
-  pdf.text(title, pdf.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
+  pdf.text(title, pdf.internal.pageSize.getWidth() / 2, 25, { align: 'center' });
   
   // 准备表格数据
   const tableData = data.map(row => headers.map(header => row[header] || ''));
@@ -979,7 +979,7 @@ function exportToPDF(headers, data, title) {
     columnStyles[i] = { 
       cellWidth: 'auto',
       cellPadding: 2,
-      lineWidth: 0.1, // 细边框
+      lineWidth: 0.5, // 细边框
       lineColor: [0, 0, 0], // 黑色边框
       font: 'FSGB2312'
     };
@@ -994,26 +994,43 @@ function exportToPDF(headers, data, title) {
   autoTable(pdf, {
     head: [headers],
     body: tableData,
-    startY: 25,
+    startY: 40,
     styles: {
       fillColor: [255, 255, 255], // 白色背景
       font: 'FSGB2312', // 使用与Excel相同的中文字体
       fontSize: 14, // 与Excel正文字体大小一致
       cellPadding: 3,
-      lineWidth: 0.1, // 细边框
+      lineWidth: 0.5, // 细边框
       lineColor: [0, 0, 0], // 黑色边框
-      valign: 'middle' // 垂直居中
+      valign: 'middle', // 垂直居中, 
+      halign: 'center'
     },
     headStyles: {
+      halign: 'center', 
+      valign: 'middle', 
       fillColor: [255, 255, 255], // 白色背景
       textColor: [0, 0, 0], // 黑色文字
       fontStyle: 'bold',
-      lineWidth: 0.1, // 细边框
+      lineWidth: 0.5, // 细边框
       lineColor: [0, 0, 0], // 黑色边框
       font: 'FSGB2312',
     },
+    alternateRowStyles: {
+      fillColor: [255, 255, 255] // 确保交替行也是白色
+    },
     columnStyles: columnStyles,
     didDrawPage: (data) => {
+      // 获取当前页码
+      const currentPage = pdf.internal.getCurrentPageInfo().pageNumber;
+      
+      // 根据页码设置不同的上边距
+      if (currentPage > 1) {
+        // 从第二页开始使用较小的上边距
+        data.settings.margin.top = 35;
+        
+        // 因为是新页面，需要设置表头的Y位置
+        data.cursor.y = 35;
+      }
       // 添加页脚
       pdf.setFontSize(10);
       pdf.text(
@@ -1029,7 +1046,7 @@ function exportToPDF(headers, data, title) {
       const cell = data.cell;
       if (cell.section === 'body') {
         pdf.setDrawColor(0);
-        pdf.setLineWidth(0.1);
+        pdf.setLineWidth(0.5);
         pdf.line(cell.x, cell.y, cell.x + cell.width, cell.y); // 上边框
         pdf.line(cell.x, cell.y + cell.height, cell.x + cell.width, cell.y + cell.height); // 下边框
         pdf.line(cell.x, cell.y, cell.x, cell.y + cell.height); // 左边框
@@ -1049,7 +1066,7 @@ function exportToPDF(headers, data, title) {
       }
     },
     // 设置页边距，确保符合A4打印要求
-    margin: { top: 25, right: 15, bottom: 15, left: 15 },
+    margin: { top: 40, right: 30, bottom: 25, left: 30 },
     // 确保表格适应页面宽度
     tableWidth: 'auto',
     // 自动分页处理
