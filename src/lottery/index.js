@@ -668,8 +668,8 @@ function showExportOptions() {
   const title = document.createElement('h3');
   title.textContent = '选择导出格式';
   title.style.color = 'rgba(127, 255, 255, 0.75)';
-  title.style.marginBottom = `${0.6 * Resolution}vh`; // 增加标题下方间距
-  title.style.fontSize = `${1 * Resolution}vh`; // 增大标题字体
+  title.style.marginBottom = `${2 * Resolution}vh`; // 增加标题下方间距
+  title.style.fontSize = `${1.5 * Resolution}vh`; // 增大标题字体
   
   // 按钮容器
   const btnContainer = document.createElement('div');
@@ -685,6 +685,7 @@ function showExportOptions() {
   excelBtn.textContent = '导出Excel文件';
   excelBtn.style.marginRight = `${0.4 * Resolution}vh`;
   excelBtn.style.flex = '1';
+  excelBtn.style.fontSize = `${1.25 * Resolution}vh`; // 增大标题字体
   excelBtn.style.padding = `${0.25 * Resolution}vh ${0.4 * Resolution}vh`; // 增加按钮内边距
   
   // PDF导出按钮
@@ -692,6 +693,7 @@ function showExportOptions() {
   pdfBtn.className = 'upload-btn';
   pdfBtn.textContent = '导出PDF文件';
   pdfBtn.style.flex = '1';
+  pdfBtn.style.fontSize = `${1.25 * Resolution}vh`; // 增大标题字体
   pdfBtn.style.padding = `${0.25 * Resolution}vh ${0.4 * Resolution}vh`; // 增加按钮内边距
   
   // 组装DOM
@@ -714,13 +716,13 @@ function showExportOptions() {
     modalOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0)';
 
     // 计算新位置，向上移动
-    const newTop = buttonRect.top - (7 * Resolution * window.innerHeight / 100); // 向上移动15vh
+    const newTop = buttonRect.top - (10 * Resolution * window.innerHeight / 100); // 向上移动15vh
     const newLeft = buttonRect.left - (5 * Resolution * window.innerWidth / 100); // 中心对齐
 
     modalContent.style.top = `${Math.max(2 * Resolution * window.innerHeight / 100, newTop)}px`; // 不要太靠近顶部
     modalContent.style.left = `${newLeft}px`;
-    modalContent.style.width = `${15 * Resolution}vw`;
-    modalContent.style.height = `${5 * Resolution}vh`; // 增加高度
+    modalContent.style.width = `${20 * Resolution}vw`;
+    modalContent.style.height = `${8 * Resolution}vh`; // 增加高度
     modalContent.style.opacity = '1';
     modalContent.style.transition = 'all 0.3s ease-out';
   }, 10);
