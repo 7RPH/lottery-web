@@ -661,38 +661,38 @@ function showExportOptions() {
   modalContent.style.borderRadius = '0.4vh';
   modalContent.style.zIndex = '10000'; // 确保内容在最上层
   modalContent.style.background = 'rgba(0, 0, 0, 0.8)'; // 确保内容背景不透明
-  modalContent.style.padding = `${2 / Resolution}vh`;
+  modalContent.style.padding = `${0.5 * Resolution}vh`;
   modalContent.style.transition = 'all 0.3s ease-out';
   
   // 标题
   const title = document.createElement('h3');
   title.textContent = '选择导出格式';
   title.style.color = 'rgba(127, 255, 255, 0.75)';
-  title.style.marginBottom = `${2.5 / Resolution}vh`; // 增加标题下方间距
-  title.style.fontSize = `${4 / Resolution}vh`; // 增大标题字体
+  title.style.marginBottom = `${0.6 * Resolution}vh`; // 增加标题下方间距
+  title.style.fontSize = `${1 * Resolution}vh`; // 增大标题字体
   
   // 按钮容器
   const btnContainer = document.createElement('div');
   btnContainer.className = 'export-btn-container';
   btnContainer.style.display = 'flex';
   btnContainer.style.justifyContent = 'space-between';
-  btnContainer.style.marginTop = `${2 / Resolution}vh`;
-  btnContainer.style.marginBottom = `${1.5 / Resolution}vh`; // 增加底部间距
+  btnContainer.style.marginTop = `${0.5 * Resolution}vh`;
+  btnContainer.style.marginBottom = `${0.4 * Resolution}vh`; // 增加底部间距
   
   // Excel导出按钮
   const excelBtn = document.createElement('button');
   excelBtn.className = 'upload-btn';
   excelBtn.textContent = '导出Excel文件';
-  excelBtn.style.marginRight = `${1.5 / Resolution}vh`;
+  excelBtn.style.marginRight = `${0.4 * Resolution}vh`;
   excelBtn.style.flex = '1';
-  excelBtn.style.padding = `${1 / Resolution}vh ${1.5 / Resolution}vh`; // 增加按钮内边距
+  excelBtn.style.padding = `${0.25 * Resolution}vh ${0.4 * Resolution}vh`; // 增加按钮内边距
   
   // PDF导出按钮
   const pdfBtn = document.createElement('button');
   pdfBtn.className = 'upload-btn';
   pdfBtn.textContent = '导出PDF文件';
   pdfBtn.style.flex = '1';
-  pdfBtn.style.padding = `${1 / Resolution}vh ${1.5 / Resolution}vh`; // 增加按钮内边距
+  pdfBtn.style.padding = `${0.25 * Resolution}vh ${0.4 * Resolution}vh`; // 增加按钮内边距
   
   // 组装DOM
   btnContainer.appendChild(excelBtn);
@@ -714,13 +714,13 @@ function showExportOptions() {
     modalOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0)';
 
     // 计算新位置，向上移动
-    const newTop = buttonRect.top - (28 / Resolution * window.innerHeight / 100); // 向上移动15vh
-    const newLeft = buttonRect.left - (15 / Resolution * window.innerWidth / 100); // 中心对齐
+    const newTop = buttonRect.top - (7 * Resolution * window.innerHeight / 100); // 向上移动15vh
+    const newLeft = buttonRect.left - (5 * Resolution * window.innerWidth / 100); // 中心对齐
 
-    modalContent.style.top = `${Math.max(8 / Resolution * window.innerHeight / 100, newTop)}px`; // 不要太靠近顶部
+    modalContent.style.top = `${Math.max(2 * Resolution * window.innerHeight / 100, newTop)}px`; // 不要太靠近顶部
     modalContent.style.left = `${newLeft}px`;
-    modalContent.style.width = `${50 / Resolution}vw`;
-    modalContent.style.height = `${20 / Resolution}vh`; // 增加高度
+    modalContent.style.width = `${15 * Resolution}vw`;
+    modalContent.style.height = `${5 * Resolution}vh`; // 增加高度
     modalContent.style.opacity = '1';
     modalContent.style.transition = 'all 0.3s ease-out';
   }, 10);
