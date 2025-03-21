@@ -150,3 +150,52 @@ function setSecret(nowItem,basicData) {
 
 ## 鸣谢
 本项目是基于[@moshang-xc](https://github.com/moshang-xc/lottery)大佬写的作品很炫酷,于是本人就二次开发了下大佬的作品,实现脱离后台前端mock分离版本,喜欢的可以给@moshang-xc点个Star 
+
+# 抽奖系统
+
+这是一个基于Electron的抽奖系统应用，已优化兼容Windows 7。
+
+## 安装与运行
+
+### 开发环境运行
+
+1. 安装依赖：
+```bash
+npm install
+```
+
+2. 启动应用：
+```bash
+npm start
+```
+
+### 构建Windows安装包
+
+```bash
+npm run dist:win
+```
+
+这将在`dist`目录中生成32位和64位的Windows安装程序。
+
+## Windows 7兼容性说明
+
+本应用已特别优化以支持Windows 7操作系统。具体兼容性调整包括：
+
+1. 使用Electron v9.4.4，这是最后一个正式支持Windows 7的版本
+2. 同时构建32位和64位版本，以支持各种硬件配置
+3. 优化了应用配置以确保在Windows 7上的稳定运行
+
+## 使用说明
+
+1. 启动应用后，点击"上传数据"按钮上传Excel文件
+2. 设置抽签参数，包括抽签名称、签的总数和开始数字
+3. 点击"开始上传"按钮加载数据
+4. 点击"开始抽签"按钮进入抽签界面
+5. 点击"抽签"按钮开始或停止抽签
+6. 可以通过"导出结果"按钮导出抽签结果为Excel或PDF格式
+
+## 注意事项
+
+- 为确保在Windows 7上的最佳性能，建议使用较新的硬件配置
+- 确保安装了最新的Windows 7 Service Pack和更新
+- 如遇到兼容性问题，请检查是否安装了.NET Framework 4.5或更高版本

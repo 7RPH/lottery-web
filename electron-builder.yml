@@ -1,0 +1,46 @@
+appId: com.lottery.web
+productName: 抽奖系统
+copyright: Copyright © 2023
+
+# Windows配置
+win:
+  # 支持32位和64位
+  target:
+    - target: nsis
+      arch:
+        - x64
+        - ia32
+  # 图标路径
+  icon: build/icon.ico
+
+# 安装程序配置
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  # 支持中文
+  unicode: true
+  # 显示中文界面
+  language: "2052"
+
+# 文件相关
+files:
+  - "**/*"
+  - "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}"
+  - "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}"
+  - "!**/node_modules/*.d.ts"
+  - "!**/node_modules/.bin"
+  - "!**/*.{iml,o,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,xproj}"
+  - "!.editorconfig"
+  - "!**/._*"
+  - "!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,.gitignore,.gitattributes}"
+  - "!**/{__pycache__,thumbs.db,.flowconfig,.idea,.vs,.nyc_output}"
+  - "!**/{appveyor.yml,.travis.yml,circle.yml}"
+  - "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}"
+
+# 额外资源
+extraResources:
+  - from: "build"
+    to: "build"
+    filter:
+      - "**/*" 

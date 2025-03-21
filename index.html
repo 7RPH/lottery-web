@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>抽奖系统</title>
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';">
+  <link rel="stylesheet" href="src/lottery/index.css">
+</head>
+<body>
+  <div id="initialLoading" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); display: flex; justify-content: center; align-items: center; z-index: 9999; transition: opacity 0.3s ease;">
+    <div style="color: white; font-size: 24px;">正在加载...</div>
+  </div>
+
+  <div id="root">
+    <div class="lottery-container">
+      <div id="container"></div>
+    </div>
+  </div>
+
+  <div id="bgVideo" style="position: fixed; height: 100%; width: 100%; top: 0; left: 0; z-index: -100;"></div>
+  
+  <div id="menu">
+    <div id="welcome" class="none menu-btn"></div>
+    <div id="enter" class="enter menu-btn element-center">开始抽签</div>
+    <div id="uploadButton" class="upload menu-btn element-center">⇧ 上传数据</div>
+    
+    <div id="lotteryBar" class="none">
+      <div id="lottery" class="lottery menu-btn element-center">抽签</div>
+      <div id="reLottery" class="menu-btn element-center">重新抽签</div>
+      <div id="back" class="menu-btn element-center">返回</div>
+      <div id="reset" class="menu-btn element-center">重置数据</div>
+      <div id="exportResult" class="menu-btn element-center">导出结果</div>
+    </div>
+  </div>
+
+  <div id="prizeBar" class="none"></div>
+  <div id="qipao" class="qipao none">
+    <span id="qipaoText"></span>
+  </div>
+
+  <div id="uploadBox" class="upload-box" style="display: none;">
+    <div class="upload-content">
+      <h3>上传Excel文件</h3>
+      <div class="file-upload">
+        <input type="file" id="fileInput" accept=".xlsx, .xls">
+        <div class="file-info">
+          <span class="file-name">未选择文件</span>
+        </div>
+      </div>
+      <div class="title-input-wrapper">
+        <label for="prizeTitle">抽签名称：</label>
+        <input type="text" id="prizeTitle" placeholder="输入抽签名称">
+      </div>
+      <div id="columnSelection" class="column-selection hidden">
+        <div class="columns-container"></div>
+      </div>
+      <div class="custom-columns-wrapper hidden">
+        <h4>设置自定义列名(抽签号码列名)</h4>
+        <div class="input-with-button">
+          <input type="text" id="newColumnName" placeholder="输入抽签号码列名">
+          <button id="addColumn" class="btn">添加</button>
+        </div>
+        <div id="customColumns" class="custom-columns-list"></div>
+      </div>
+      <div class="enum-input-wrapper">
+        <label for="enum">签的总数：</label>
+        <input type="number" id="enum" min="1" value="100">
+      </div>
+      <div class="start-input-wrapper">
+        <label for="startNumber">开始数字：</label>
+        <input type="number" id="startNumber" min="1" value="1">
+      </div>
+      <button id="uploadExcel" class="upload-btn" disabled>开始上传</button>
+    </div>
+  </div>
+
+  <script>
+    // 在页面加载时动态加载脚本
+    window.addEventListener('DOMContentLoaded', () => {
+      // 引入所需的脚本
+      const scripts = [
+        './node_modules/three/build/three.min.js',
+        './node_modules/tween.js/build/tween.umd.js',
+        './node_modules/three/examples/js/controls/TrackballControls.js',
+        './node_modules/three/examples/js/renderers/CSS3DRenderer.js',
+        './src/lottery/index.js'
+      ];
+      
+      let loaded = 0;
+      scripts.forEach(src => {
+        const script = document.createElement('script');
+        script.src = src;
+        script.onload = () => {
+          loaded++;
+          if (loaded === scripts.length) {
+            // 所有脚本加载完成
+            console.log('所有脚本加载完成');
+          }
+        };
+        document.body.appendChild(script);
+      });
+    });
+  </script>
+</body>
+</html> 

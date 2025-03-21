@@ -1,6 +1,6 @@
 {
   "name": "lottery",
-  "version": "1.0.5",
+  "version": "1.2.0",
   "description": "lottery",
   "main": "main.js",
   "scripts": {
@@ -9,7 +9,11 @@
     "dev": "webpack-dev-server --config webpack.dev.js --mode=development --progress --colors",
     "electron:dev": "electron .",
     "electron:build": "npm run build && electron-builder",
-    "dist": "electron-builder"
+    "dist": "electron-builder",
+    "dist:win": "electron-builder --win --ia32 --x64",
+    "postinstall": "electron-builder install-app-deps",
+    "start": "electron .",
+    "pack": "electron-builder --dir"
   },
   "author": "author",
   "license": "ISC",
@@ -23,7 +27,7 @@
     "copy-webpack-plugin": "^4.5.0",
     "cross-env": "^6.0.3",
     "css-loader": "^0.28.10",
-    "electron": "^33.2.1",
+    "electron": "9.4.4",
     "electron-builder": "^25.1.8",
     "html-loader": "^0.5.5",
     "html-webpack-plugin": "^3.0.4",
@@ -36,14 +40,16 @@
     "webpack-merge": "^4.2.2"
   },
   "dependencies": {
-    "exceljs": "^4.4.0",
-    "jspdf": "^3.0.0",
-    "jspdf-autotable": "^5.0.2",
+    "exceljs": "^4.3.0",
+    "jspdf": "^2.4.0",
+    "jspdf-autotable": "^3.5.23",
+    "three": "^0.125.0",
+    "tween.js": "^16.6.0",
     "xlsx": "^0.18.5"
   },
   "build": {
     "appId": "com.lottery.app",
-    "productName": "lottery",
+    "productName": "抽奖系统",
     "directories": {
       "output": "electron-dist"
     },
@@ -53,12 +59,17 @@
     ],
     "win": {
       "target": [
-        "nsis"
-      ]
+        {
+          "target": "nsis",
+          "arch": ["x64", "ia32"]
+        }
+      ],
+      "icon": "build/icon.ico"
     },
     "nsis": {
       "oneClick": false,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
     }
   }
 }
