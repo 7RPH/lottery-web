@@ -267,9 +267,32 @@ function bindEvent() {
   const enumNumInput = document.getElementById('enum');
   const startNumInput = document.getElementById('startNumber');
 
+  const excelBtn = document.getElementById("exportExcel");
+  const pdfBtn = document.getElementById("exportPDF");
+
   let isBoxVisible = false;
   // 文件选择处理
   const customColumnsWrapper = document.querySelector('.custom-columns-wrapper');
+
+
+  excelBtn.addEventListener('click', async () => {
+    // 阻止事件冒泡
+    console.log("cilck export excel btn");
+    // e.stopPropagation();
+    // 收起动画
+    // closeModal(modalOverlay, modalContent, buttonRect, () => {
+      exportExcelOnly();
+    // });
+  });
+  
+  pdfBtn.addEventListener('click', async () => {
+    // 阻止事件冒泡
+    // e.stopPropagation();
+    // 收起动画
+    // closeModal(modalOverlay, modalContent, buttonRect, () => {
+      exportPDFOnly();
+    // });
+  });
 
   fileInput.addEventListener('change', async (event) => {
     const file = event.target.files[0];
@@ -629,129 +652,95 @@ function showExportOptions() {
   if (exportModalVisible && currentExportModal) {
     const exportButton = document.getElementById('exportResult');
     const buttonRect = exportButton.getBoundingClientRect();
-    closeModal(currentExportModal.overlay, currentExportModal.content, buttonRect);
+    closeModal(currentExportModal.content, buttonRect);
     return;
   }
   // 获取导出按钮位置信息，用于动画
   const exportButton = document.getElementById('exportResult');
   const buttonRect = exportButton.getBoundingClientRect();
   
-  // 创建弹窗
-  const modalOverlay = document.createElement('div');
-  modalOverlay.style.position = 'fixed';
-  modalOverlay.style.top = '0';
-  modalOverlay.style.left = '0';
-  modalOverlay.style.width = '100%';
-  modalOverlay.style.height = '100%';
-  modalOverlay.style.zIndex = '9999';
-  modalOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0)'; // 初始透明
-  modalOverlay.style.transition = 'background-color 0.3s ease-out';
+  // // 创建弹窗
+  // const modalOverlay = document.getElementById('overDelay');
+  // modalOverlay.style.position = 'fixed';
+  // modalOverlay.style.top = '0';
+  // modalOverlay.style.left = '0';
+  // modalOverlay.style.width = '100%';
+  // modalOverlay.style.height = '100%';
+  // modalOverlay.style.zIndex = '5000';
+  // modalOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0)'; // 初始透明
+  // modalOverlay.style.transition = 'background-color 0.3s ease-out';
 
-  const modalContent = document.createElement('div');
-  modalContent.className = 'upload-content';
+  const modalContent = document.getElementById("exportBox");
   
   // 设置初始位置和大小（从按钮位置开始）
-  modalContent.style.position = 'absolute';
-  modalContent.style.top = `${buttonRect.top}px`;
-  modalContent.style.left = `${buttonRect.left}px`;
-  modalContent.style.width = `${buttonRect.width}px`;
-  modalContent.style.height = `${buttonRect.height}px`;
-  modalContent.style.overflow = 'hidden';
+  modalContent.style.top = `${buttonRect.bottom}px`;
+  modalContent.style.left = `${buttonRect.left + buttonRect.width/2}px`;
   modalContent.style.opacity = '0';
-  modalContent.style.borderRadius = '0.4vh';
-  modalContent.style.zIndex = '10000'; // 确保内容在最上层
-  modalContent.style.background = 'rgba(0, 0, 0, 0.8)'; // 确保内容背景不透明
-  modalContent.style.padding = `${0.5 * Resolution}vh`;
-  modalContent.style.transition = 'all 0.3s ease-out';
-  
-  // 标题
-  const title = document.createElement('h3');
-  title.textContent = '选择导出格式';
-  title.style.color = 'rgba(127, 255, 255, 0.75)';
-  title.style.marginBottom = `${2 * Resolution}vh`; // 增加标题下方间距
-  title.style.fontSize = `${1.5 * Resolution}vh`; // 增大标题字体
-  
-  // 按钮容器
-  const btnContainer = document.createElement('div');
-  btnContainer.className = 'export-btn-container';
-  btnContainer.style.display = 'flex';
-  btnContainer.style.justifyContent = 'space-between';
-  btnContainer.style.marginTop = `${0.5 * Resolution}vh`;
-  btnContainer.style.marginBottom = `${0.4 * Resolution}vh`; // 增加底部间距
-  
+  modalContent.style.position = 'fixed'; // 确保使用fixed定位
+  modalContent.style.transform = 'translate(-50%, 0) scale(0.5)';
+  modalContent.style.zIndex = '9999'; // 确保内容在最上层
+  modalContent.style.display = 'block';
+
   // Excel导出按钮
-  const excelBtn = document.createElement('button');
-  excelBtn.className = 'upload-btn';
-  excelBtn.textContent = '导出Excel文件';
-  excelBtn.style.marginRight = `${0.4 * Resolution}vh`;
-  excelBtn.style.flex = '1';
-  excelBtn.style.fontSize = `${1.25 * Resolution}vh`; // 增大标题字体
-  excelBtn.style.padding = `${0.25 * Resolution}vh ${0.4 * Resolution}vh`; // 增加按钮内边距
+  // const excelBtn = document.getElementById("exportExcel");
+  // excelBtn.style.marginRight = `${0.4 * Resolution}vh`;
+  // excelBtn.style.flex = '1';
+  // excelBtn.style.fontSize = `${1.25 * Resolution}vh`; // 增大标题字体
+  // excelBtn.style.padding = `${0.25 * Resolution}vh ${0.4 * Resolution}vh`; // 增加按钮内边距
   
   // PDF导出按钮
-  const pdfBtn = document.createElement('button');
-  pdfBtn.className = 'upload-btn';
-  pdfBtn.textContent = '导出PDF文件';
-  pdfBtn.style.flex = '1';
-  pdfBtn.style.fontSize = `${1.25 * Resolution}vh`; // 增大标题字体
-  pdfBtn.style.padding = `${0.25 * Resolution}vh ${0.4 * Resolution}vh`; // 增加按钮内边距
+  // const pdfBtn = document.getElementById("exportPDF");
+  // pdfBtn.style.flex = '1';
+  // pdfBtn.style.fontSize = `${1.25 * Resolution}vh`; // 增大标题字体
+  // pdfBtn.style.padding = `${0.25 * Resolution}vh ${0.4 * Resolution}vh`; // 增加按钮内边距
   
   // 组装DOM
-  btnContainer.appendChild(excelBtn);
-  btnContainer.appendChild(pdfBtn);
-  modalContent.appendChild(title);
-  modalContent.appendChild(btnContainer);
-  modalOverlay.appendChild(modalContent);
-  document.body.appendChild(modalOverlay);
+  // document.body.appendChild(modalOverlay);
 
   // 保存当前弹窗引用
   currentExportModal = {
-    overlay: modalOverlay,
+    // overlay: modalOverlay,
     content: modalContent
   };
   exportModalVisible = true;
 
   // 应用动画效果 - 从按钮展开到完整大小
   setTimeout(() => {
-    modalOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0)';
+    // modalOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
 
-    // 计算新位置，向上移动
-    const newTop = buttonRect.top - (10 * Resolution * window.innerHeight / 100); // 向上移动15vh
-    const newLeft = buttonRect.left - (5 * Resolution * window.innerWidth / 100); // 中心对齐
+    // // 计算新位置，向上移动
+    // const newTop = buttonRect.top - (10 * Resolution * window.innerHeight / 100); // 向上移动15vh
+    // const newLeft = buttonRect.left - (5 * Resolution * window.innerWidth / 100); // 中心对齐
 
-    modalContent.style.top = `${Math.max(2 * Resolution * window.innerHeight / 100, newTop)}px`; // 不要太靠近顶部
-    modalContent.style.left = `${newLeft}px`;
-    modalContent.style.width = `${20 * Resolution}vw`;
-    modalContent.style.height = `${8 * Resolution}vh`; // 增加高度
+    // modalContent.style.top = `${Math.max(2 * Resolution * window.innerHeight / 100, newTop)}px`; // 不要太靠近顶部
+    // modalContent.style.left = `${newLeft}px`;
+    // modalContent.style.width = `${20 * Resolution}vw`;
+    // modalContent.style.height = `${8 * Resolution}vh`; // 增加高度
     modalContent.style.opacity = '1';
     modalContent.style.transition = 'all 0.3s ease-out';
+    modalContent.style.transform = 'translate(-50%, -205%) scale(1)';
   }, 10);
   
   // 事件绑定
-  excelBtn.addEventListener('click', (e) => {
-    // 阻止事件冒泡
-    e.stopPropagation();
-    // 收起动画
-    // closeModal(modalOverlay, modalContent, buttonRect, () => {
-      exportExcelOnly();
-    // });
-  });
+  // excelBtn.addEventListener('click', (e) => {
+  //   // 阻止事件冒泡
+  //   console.log("cilck export excel btn");
+  //   e.stopPropagation();
+  //   // 收起动画
+  //   // closeModal(modalOverlay, modalContent, buttonRect, () => {
+  //     exportExcelOnly();
+  //   // });
+  // });
   
-  pdfBtn.addEventListener('click', (e) => {
-    // 阻止事件冒泡
-    e.stopPropagation();
-    // 收起动画
-    // closeModal(modalOverlay, modalContent, buttonRect, () => {
-      exportPDFOnly();
-    // });
-  });
-  
-  // 点击背景关闭
-  modalOverlay.addEventListener('click', (e) => {
-    if (e.target === modalOverlay) {
-      closeModal(modalOverlay, modalContent, buttonRect);
-    }
-  });
+  // pdfBtn.addEventListener('click', (e) => {
+  //   // 阻止事件冒泡
+  //   e.stopPropagation();
+  //   // 收起动画
+  //   // closeModal(modalOverlay, modalContent, buttonRect, () => {
+  //     exportPDFOnly();
+  //   // });
+  // });
+
 
   // 阻止点击内容时触发背景点击事件
   modalContent.addEventListener('click', (e) => {
@@ -760,22 +749,20 @@ function showExportOptions() {
 }
 
 // 关闭模态框的动画函数
-function closeModal(overlay, content, buttonRect, callback) {
+function closeModal(content, buttonRect, callback) {
   // 反向动画 - 收缩回按钮位置
-  content.style.top = `${buttonRect.top}px`;
-  content.style.left = `${buttonRect.left}px`;
-  content.style.width = `${buttonRect.width}px`;
-  content.style.height = `${buttonRect.height}px`;
-  content.style.transform = 'none';
+  // content.style.top = `${buttonRect.top}px`;
+  // content.style.left = `${buttonRect.left + buttonRect.width/2}px`;
   content.style.opacity = '0';
-  overlay.style.backgroundColor = 'rgba(0, 0, 0, 0)';
+  content.style.transition = 'all 0.3s ease-in';
+  content.style.transform = 'translate(-50%, 0) scale(0.5)';
   
   // 重置弹窗状态
   exportModalVisible = false;
   currentExportModal = null;
   // 动画完成后移除元素
   setTimeout(() => {
-    document.body.removeChild(overlay);
+    content.style.display = 'none';
     if (callback) callback();
   }, 300);
 }
@@ -1005,6 +992,7 @@ function exportToPDF(headers, data, title) {
       cellPadding: 3,
       lineWidth: 0.5, // 细边框
       lineColor: [0, 0, 0], // 黑色边框
+      textColor: [0, 0, 0], 
       valign: 'middle', // 垂直居中, 
       halign: 'center'
     },
