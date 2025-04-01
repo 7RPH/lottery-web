@@ -1864,19 +1864,23 @@ function lotteryRan(dataLength, signCount) {
     localStorage.setItem("randomResult", JSON.stringify(arr.slice(0, dataLength)));
     return arr.slice(0, dataLength);
 } else {
-    // 计算每个签号的出现次数
+    // 修改逻辑：随机选择 r 个签号分配额外的重复次数
     const q = Math.floor(dataLength / signCount);
     const r = dataLength % signCount;
+    // 1. 生成所有签号的数组并随机打乱，用于选择额外重复的签号
+    const allSigns = Array.from({ length: signCount }, (_, i) => i + 1);
+    for (let i = allSigns.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [allSigns[i], allSigns[j]] = [allSigns[j], allSigns[i]];
+    }
+    const extraSigns = allSigns.slice(0, r); // 随机选取 r 个签号
+    // 2. 填充数组：被选中的签号重复 q+1 次，其余重复 q 次
     let arr = [];
-    // 填充前r个签号，每个出现q+1次
-    for (let i = 1; i <= r; i++) {
-        arr.push(...Array(q + 1).fill(i));
+    for (const sign of allSigns) {
+        const repeatCount = extraSigns.includes(sign) ? q + 1 : q;
+        arr.push(...Array(repeatCount).fill(sign));
     }
-    // 填充剩余签号，每个出现q次
-    for (let i = r + 1; i <= signCount; i++) {
-        arr.push(...Array(q).fill(i));
-    }
-    // 洗牌数组
+    // 3. 再次洗牌确保最终结果的随机性
     for (let i = arr.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [arr[i], arr[j]] = [arr[j], arr[i]];
