@@ -272,7 +272,7 @@ function bindEvent() {
 
   let isBoxVisible = false;
   // 文件选择处理
-  const customColumnsWrapper = document.querySelector('.custom-columns-wrapper');
+  // const customColumnsWrapper = document.querySelector('.custom-columns-wrapper');
 
 
   excelBtn.addEventListener('click', async () => {
@@ -300,7 +300,7 @@ function bindEvent() {
       fileName.textContent = '未选择文件';
       uploadExcel.disabled = true;
       columnSelection.classList.add('hidden');
-      customColumnsWrapper.classList.add('hidden');
+      // customColumnsWrapper.classList.add('hidden');
       document.querySelector('.title-input-wrapper').classList.add('hidden');
       return;
     }
@@ -318,6 +318,7 @@ function bindEvent() {
       // 设置默认值
       enumNumInput.value = localStorage.getItem("count");
       startNumInput.value = 1;
+      newColumnInput.value = "考号";
       // 创建单个列选择
       const item = document.createElement('div');
       item.className = 'column-item';
@@ -333,7 +334,7 @@ function bindEvent() {
       columnsContainer.appendChild(item);
 
       columnSelection.classList.remove('hidden');
-      customColumnsWrapper.classList.remove('hidden');
+      // customColumnsWrapper.classList.remove('hidden');
       uploadExcel.disabled = false;
 
     } catch (error) {
@@ -341,7 +342,7 @@ function bindEvent() {
       fileName.textContent = '文件解析失败';
       uploadExcel.disabled = true;
       columnSelection.classList.add('hidden');
-      customColumnsWrapper.classList.add('hidden');
+      // customColumnsWrapper.classList.add('hidden');
     }
   });
 
@@ -355,7 +356,8 @@ function bindEvent() {
 
     // 获取用户选择的列
     const selectedColumn = document.querySelector('select[name="dataColumn"]').value;
-    const customColumns = Array.from(document.querySelectorAll('.column-tag')).map(tag => tag.textContent.replace('×', '').trim());
+    // const customColumns = Array.from(document.querySelectorAll('.column-tag')).map(tag => tag.textContent.replace('×', '').trim());
+    const customColumns = [newColumnInput.value];
     localStorage.setItem("customColumns", JSON.stringify(customColumns));
 
     // 验证是否选择了列
@@ -364,10 +366,10 @@ function bindEvent() {
       return;
     }
     // 验证是否设置了自定义列
-    if (customColumns.length === 0) {
-      alert('请设置自定义列');
-      return;
-    }
+    // if (customColumns.length === 0) {
+    //   alert('请设置自定义列');
+    //   return;
+    // }
 
     const prizeTitle = document.getElementById('prizeTitle').value.trim();
     if (prizeTitle) {
@@ -605,42 +607,42 @@ function bindEvent() {
 
   window.addEventListener("resize", onWindowResize, false);
 
-  // 添加新列名
-  addColumnBtn.addEventListener('click', () => {
-    const columnName = newColumnInput.value.trim();
-    if (!columnName) return;
+  // // 添加新列名
+  // addColumnBtn.addEventListener('click', () => {
+  //   const columnName = newColumnInput.value.trim();
+  //   if (!columnName) return;
 
-    if (customColumns.has(columnName)) {
-      alert('该列名已存在');
-      return;
-    }
+  //   if (customColumns.has(columnName)) {
+  //     alert('该列名已存在');
+  //     return;
+  //   }
 
-    customColumns.add(columnName);
+  //   customColumns.add(columnName);
 
-    // 创建列名标签
-    const tag = document.createElement('span');
-    tag.className = 'column-tag';
-    tag.innerHTML = `
-      ${columnName}
-      <span class="remove-btn">×</span>
-    `;
+  //   // 创建列名标签
+  //   const tag = document.createElement('span');
+  //   tag.className = 'column-tag';
+  //   tag.innerHTML = `
+  //     ${columnName}
+  //     <span class="remove-btn">×</span>
+  //   `;
 
-    // 删除列名
-    tag.querySelector('.remove-btn').addEventListener('click', () => {
-      customColumns.delete(columnName);
-      tag.remove();
-    });
+  //   // 删除列名
+  //   tag.querySelector('.remove-btn').addEventListener('click', () => {
+  //     customColumns.delete(columnName);
+  //     tag.remove();
+  //   });
 
-    customColumnsList.appendChild(tag);
-    newColumnInput.value = '';
-  });
+  //   customColumnsList.appendChild(tag);
+  //   newColumnInput.value = '';
+  // });
 
-  // 回车添加列名
-  newColumnInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-      addColumnBtn.click();
-    }
-  });
+  // // 回车添加列名
+  // newColumnInput.addEventListener('keypress', (e) => {
+  //   if (e.key === 'Enter') {
+  //     addColumnBtn.click();
+  //   }
+  // });
 
   const exportButton = document.getElementById('exportResult');
   exportButton.addEventListener('click', showExportOptions);
