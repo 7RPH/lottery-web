@@ -23,8 +23,8 @@
     "copy-webpack-plugin": "^4.5.0",
     "cross-env": "^6.0.3",
     "css-loader": "^0.28.10",
-    "electron": "^33.2.1",
-    "electron-builder": "^25.1.8",
+    "electron": "^20.3.10",
+    "electron-builder": "^23.0.0",
     "html-loader": "^0.5.5",
     "html-webpack-plugin": "^3.0.4",
     "postcss-loader": "^2.1.1",
@@ -44,6 +44,8 @@
   "build": {
     "appId": "com.lottery.app",
     "productName": "lottery",
+    "nodeGypRebuild": false,
+    "npmRebuild": false,
     "directories": {
       "output": "electron-dist"
     },
@@ -54,7 +56,9 @@
     "win": {
       "target": [
         "nsis"
-      ]
+      ],
+    "requestedExecutionLevel": "asInvoker",
+    "icon": "build/icon.ico"
     },
     "nsis": {
       "oneClick": false,
