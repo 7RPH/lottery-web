@@ -65,12 +65,6 @@
   </div>
 
   <div class="bg-box" id="bgVideo"> </div>
-
-  <!-- <div class="music">
-    <audio id="music" class="music-item" loop></audio>
-    <div id="musicBox" class="music-box" title="播放/暂停背景音乐"></div>
-  </div> -->
-
   <div id="prizeBar"></div>
 
   <div id="container"></div>
@@ -98,25 +92,25 @@
           <h4>设置起始序号（默认为1，并按照总人数自动补0）</h4>
           <input type="text" id="startNumber" placeholder="请输入起始序号">
           <br>
-          <h4>设置新增数据列（例如考场号，座位号等，默认为考号）</h4>
+          <h4>设置新增数据列名称（例如考场号，座位号等，默认为考号）</h4>
           <input type="text" id="newColumnName" placeholder="输入新列名">
         </div>
         <div id="columnSelection" class="column-selection hidden">
-          <h4>请选择展示数据列</h4>
+          <!-- <h4>请选择展示数据列（用于在抽签展示的卡片上显示）</h4> -->
           <div class="columns-container">
             <!-- 动态添加的列选择框 -->
           </div>
+          <h4>请选择数据标签（用于特殊抽签情况，比如依据专业抽签等）</h4>
+          <div class="columns-container" id="dataLabels">
+            <!-- 动态添加的列选择框 -->
+          </div>
         </div>
-        <button id="uploadExcel" class="upload-btn" disabled>设置完成</button>
+        <button id="uploadExcel" class="upload-btn hidden" disabled>设置完成</button>
       </div>
     </div>
     <button id="enter">进入抽签</button>
     <div id="lotteryBar" class="none">
       <button id="lottery">开始</button>
-      <!-- <button id="reLottery">重新抽奖</button> -->
-      <!-- <button id="result">返回首页</button> -->
-      <!-- <button id="back">返回首页</button> -->
-      <!-- <button id="awards">颁奖模式</button> -->
       <button id="exportResult">导出结果</button>
       <button id="reset" class="margin-l-40">重置</button>
     </div>

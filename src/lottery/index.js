@@ -259,17 +259,14 @@ function bindEvent() {
   const uploadBox = document.getElementById('uploadBox');
   const fileName = document.querySelector('.file-name');
   const columnSelection = document.getElementById('columnSelection');
-  const columnsContainer = document.querySelector('.columns-container');
+  // const columnsContainer = document.querySelector('.columns-container');
   const newColumnInput = document.getElementById('newColumnName');
-  const addColumnBtn = document.getElementById('addColumn');
-  const customColumnsList = document.getElementById('customColumns');
-  const customColumns = new Set(); // 存储自定义列名
   const enumNumInput = document.getElementById('enum');
   const startNumInput = document.getElementById('startNumber');
 
   const excelBtn = document.getElementById("exportExcel");
   const pdfBtn = document.getElementById("exportPDF");
-
+  const dataLabels = document.getElementById("dataLabels");
   let isBoxVisible = false;
   // 文件选择处理
   // const customColumnsWrapper = document.querySelector('.custom-columns-wrapper');
@@ -307,32 +304,49 @@ function bindEvent() {
 
     fileName.textContent = file.name;
     document.querySelector('.title-input-wrapper').classList.remove('hidden');
+    document.getElementById("uploadExcel").classList.remove('hidden');
     // document.querySelector('.enum-input-wrapper').classList.remove('hidden');
     // document.querySelector('.start-input-wrapper').classList.remove('hidden');
     try {
       // 预览Excel文件，获取列名
       const columns = await previewExcel(file);
-
+      localStorage.setItem("excelColumns", JSON.stringify(columns));
       // 清空之前的选项
-      columnsContainer.innerHTML = '';
+      // columnsContainer.innerHTML = '';
+      dataLabels.innerHTML = '';
       // 设置默认值
       enumNumInput.value = localStorage.getItem("count");
       startNumInput.value = 1;
       newColumnInput.value = "考号";
       // 创建单个列选择
+      const truncateColumnName = (columnName, maxLength = 11) => {
+        if (columnName.length > maxLength) {
+          return columnName.substring(0, maxLength) + '...';
+        }
+        return columnName;
+      };
       const item = document.createElement('div');
+      const labels = document.createElement('div');
       item.className = 'column-item';
+      labels.className = 'column-item';
       item.innerHTML = `
-      <label>选择数据列:</label>
       <select name="dataColumn">
         <option value="">请选择</option>
         ${columns.map((col, index) => `
-          <option value="${index}">${col}</option>
+          <option value="${index}" title="${col}">${truncateColumnName(col)}</option>
         `).join('')}
       </select>
     `;
-      columnsContainer.appendChild(item);
-
+    labels.innerHTML = `
+    <select name="dataLabel">
+      <option value="">无</option>
+      ${columns.map((col, index) => `
+        <option value="${index}" title="${col}">${truncateColumnName(col)}</option>
+      `).join('')}
+    </select>
+  `;
+      // columnsContainer.appendChild(item);
+      dataLabels.appendChild(labels);
       columnSelection.classList.remove('hidden');
       // customColumnsWrapper.classList.remove('hidden');
       uploadExcel.disabled = false;
@@ -355,16 +369,22 @@ function bindEvent() {
     localStorage.setItem("start", startNumInput.value);
 
     // 获取用户选择的列
-    const selectedColumn = document.querySelector('select[name="dataColumn"]').value;
+    // const selectedColumn = document.querySelector('select[name="dataColumn"]').value;
+    // patch 把用户选择的列默认为姓名
+    const selectedColumn = JSON.parse(localStorage.getItem("excelColumns")).indexOf("姓名");
+    const selectedLabel = parseInt(document.querySelector('select[name="dataLabel"]').value);
     // const customColumns = Array.from(document.querySelectorAll('.column-tag')).map(tag => tag.textContent.replace('×', '').trim());
     const customColumns = [newColumnInput.value];
     localStorage.setItem("customColumns", JSON.stringify(customColumns));
-
-    // 验证是否选择了列
-    if (selectedColumn === '') {
-      alert('请选择数据列');
-      return;
+    
+    if (selectedLabel !== -1) {
+      localStorage.setItem("selectedLabel", JSON.stringify(selectedLabel));
     }
+    // // 验证是否选择了列
+    // if (selectedColumn === '') {
+    //   alert('请选择数据列');
+    //   return;
+    // }
     // 验证是否设置了自定义列
     // if (customColumns.length === 0) {
     //   alert('请设置自定义列');
@@ -1854,52 +1874,93 @@ function lotteryRanApi(dataLength, signCount){
 }
 
 function lotteryRan(dataLength, signCount) {
-  if (signCount >= dataLength) {
-    // 生成1到signCount的数组并洗牌，然后截取前dataLength个元素
-    let arr = Array.from({ length: signCount }, (_, i) => i + 1);
-    for (let i = arr.length - 1; i > 0; i--) {
+  // 从localStorage中获取selectedLabel参数
+  const selectedLabel = parseInt(localStorage.getItem("selectedLabel")) || -1;
+  
+  // 如果用户设置了label
+  if (selectedLabel > -1) {
+    // 获取Excel数据
+    signCount = parseInt(localStorage.getItem("count"));
+    const excelData = JSON.parse(localStorage.getItem("excelData")) || [];
+    if (excelData.length <= 1) return []; // 如果没有数据，返回空数组
+    
+    // 获取标签列数据（跳过表头）
+    const labelData = excelData.slice(1).map(row => row[selectedLabel]);
+    // 创建标签到索引的映射
+    const labelToIndices = {};
+    labelData.forEach((label, index) => {
+      if (!labelToIndices[label]) {
+        labelToIndices[label] = [];
+      }
+      labelToIndices[label].push(index);
+    });
+    // 获取所有唯一的标签
+    const uniqueLabels = Object.keys(labelToIndices);
+    
+    // 为每个标签生成随机签号，并确保相同标签的数据是连续的
+    const result = [];
+    
+    // 随机打乱标签顺序，使不同标签的排列也是随机的
+    const shuffledLabels = [...uniqueLabels];
+    for (let i = shuffledLabels.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffledLabels[i], shuffledLabels[j]] = [shuffledLabels[j], shuffledLabels[i]];
+    }
+    
+    // 按打乱后的标签顺序添加索引
+    shuffledLabels.forEach(label => {
+      const indices = labelToIndices[label];
+      const selectedIndices = [...indices];
+      for (let i = selectedIndices.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-    localStorage.setItem("randomResult", JSON.stringify(arr.slice(0, dataLength)));
-    return arr.slice(0, dataLength);
-} else {
-    // 修改逻辑：随机选择 r 个签号分配额外的重复次数
-    const q = Math.floor(dataLength / signCount);
-    const r = dataLength % signCount;
-    // 1. 生成所有签号的数组并随机打乱，用于选择额外重复的签号
-    const allSigns = Array.from({ length: signCount }, (_, i) => i + 1);
-    for (let i = allSigns.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [allSigns[i], allSigns[j]] = [allSigns[j], allSigns[i]];
-    }
-    const extraSigns = allSigns.slice(0, r); // 随机选取 r 个签号
-    // 2. 填充数组：被选中的签号重复 q+1 次，其余重复 q 次
-    let arr = [];
-    for (const sign of allSigns) {
-        const repeatCount = extraSigns.includes(sign) ? q + 1 : q;
-        arr.push(...Array(repeatCount).fill(sign));
-    }
-    // 3. 再次洗牌确保最终结果的随机性
-    for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
+        [selectedIndices[i], selectedIndices[j]] = [selectedIndices[j], selectedIndices[i]];
+      }
+      result.push(...selectedIndices);
+    });
+    let arr = Array.from({ length: signCount }, (_, i) => result.indexOf(i) + 1);
+    // for (let i = 0; i < arr.length; i++) {
+    //   [arr[i], arr[j]] = [arr[j], arr[i]];
+    // }
+    // 保存随机结果到localStorage
     localStorage.setItem("randomResult", JSON.stringify(arr));
     return arr;
-}
-  // // 创建一个包含从 0 到 number - 1 的数组
-  // let arr = Array.from({ length: number }, (_, i) => i);
-
-  // // 洗牌数组
-  // for (let i = arr.length - 1; i > 0; i--) {
-  //   const j = Math.floor(Math.random() * (i + 1));
-  //   [arr[i], arr[j]] = [arr[j], arr[i]]; // 交换元素
-  // }
-  // // console.log(arr.slice(0, time));
-  // localStorage.setItem("randomResult", JSON.stringify(arr.slice(0, time)));
-  // // 返回前 time 个元素
-  // return arr.slice(0, time);
+  } else {
+    // 原有的随机逻辑，不按标签分组
+    if (signCount >= dataLength) {
+      // 生成1到signCount的数组并洗牌，然后截取前dataLength个元素
+      let arr = Array.from({ length: signCount }, (_, i) => i + 1);
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      localStorage.setItem("randomResult", JSON.stringify(arr.slice(0, dataLength)));
+      return arr.slice(0, dataLength);
+    } else {
+      // 修改逻辑：随机选择 r 个签号分配额外的重复次数
+      const q = Math.floor(dataLength / signCount);
+      const r = dataLength % signCount;
+      // 1. 生成所有签号的数组并随机打乱，用于选择额外重复的签号
+      const allSigns = Array.from({ length: signCount }, (_, i) => i + 1);
+      for (let i = allSigns.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [allSigns[i], allSigns[j]] = [allSigns[j], allSigns[i]];
+      }
+      const extraSigns = allSigns.slice(0, r); // 随机选取 r 个签号
+      // 2. 填充数组：被选中的签号重复 q+1 次，其余重复 q 次
+      let arr = [];
+      for (const sign of allSigns) {
+        const repeatCount = extraSigns.includes(sign) ? q + 1 : q;
+        arr.push(...Array(repeatCount).fill(sign));
+      }
+      // 3. 再次洗牌确保最终结果的随机性
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      localStorage.setItem("randomResult", JSON.stringify(arr));
+      return arr;
+    }
+  }
 }
 // lotteryRa(30,5)
 

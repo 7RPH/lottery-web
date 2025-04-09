@@ -663,7 +663,7 @@ video {
 }
 
 .column-selection h4 {
-  margin: 0 0 1vh;
+  margin: 10px 0 10px;
   font-size: 14px;
   color: rgba(127, 255, 255, 0.75);
 }
@@ -675,6 +675,7 @@ video {
 }
 
 .column-item {
+  width: 54%;
   display: flex;
   align-items: center;
   gap: 1vh;
@@ -687,10 +688,11 @@ video {
 
 .column-item select {
   flex: 1;
+  padding: 8px 12px;
   background: rgba(127, 255, 255, 0.1);
   border: 0.1vh solid rgba(127, 255, 255, 0.2);
   color: rgba(127, 255, 255, 0.75);
-  padding: 0.5vh;
+  /* padding: 0.5vh; */
   border-radius: 0.4vh;
 }
 
