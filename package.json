@@ -1,6 +1,6 @@
 {
   "name": "lottery",
-  "version": "1.2.2",
+  "version": "v1.2.2",
   "description": "lottery",
   "main": "main.js",
   "scripts": {
@@ -49,20 +49,31 @@
     "directories": {
       "output": "electron-dist"
     },
+    "extraResources": [
+      {
+        "from": "resources/fonts",
+        "to": "fonts"
+      }
+    ],
     "files": [
       "dist/**/*",
       "main.js"
     ],
     "win": {
       "target": [
-        "nsis"
+        {
+          "target": "nsis",
+          "arch": ["x64", "ia32"]
+        }
       ],
     "requestedExecutionLevel": "asInvoker",
     "icon": "build/icon.ico"
     },
     "nsis": {
       "oneClick": false,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "include": "installer/installer.nsh"
     }
   }
 }
