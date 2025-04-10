@@ -71,9 +71,8 @@
     },
     "nsis": {
       "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
-      "include": "installer/installer.nsh"
+      "allowToChangeInstallationDirectory": true
+
     }
   }
 }
