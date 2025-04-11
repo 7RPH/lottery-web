@@ -1032,6 +1032,7 @@ function exportToPDF(headers, data, title) {
       fillColor: [255, 255, 255] // 确保交替行也是白色
     },
     columnStyles: columnStyles,
+    rowPageBreak: 'avoid',
     didDrawPage: (data) => {
       // 获取当前页码
       const currentPage = pdf.internal.getCurrentPageInfo().pageNumber;
