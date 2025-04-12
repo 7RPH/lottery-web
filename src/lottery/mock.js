@@ -182,115 +182,89 @@ const height = window.innerWidth * .75 * .75
  */
 const EACH_COUNT = [1, 100, 1, 5, 5];
 
-export function parseExcelWithMapping(file, selectedColumn) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    
-    reader.onload = async (e) => {
-      try {
-        const data = e.target.result;
-        const workbook = new ExcelJS.Workbook();
-        await workbook.xlsx.load(data);
-        
-        // 获取第一个工作表
-        const worksheet = workbook.worksheets[0];
-        if (!worksheet) {
-          reject(new Error('Excel文件没有工作表'));
-          return;
-        }
-        
-        // 读取数据并处理
-        const processedData = [];
-        let isFirstRow = true;
-        
-        worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
-          // 跳过表头
-          if (isFirstRow) {
-            isFirstRow = false;
-            return;
-          }
-          
-          const cellValue = row.getCell(parseInt(selectedColumn) + 1).value;
-          if (cellValue) {
-            processedData.push([
-              String(cellValue), // 选中的列
-              String(cellValue), // 重复一次作为显示名称
-              "未分组" // 默认分组
-            ]);
-          }
-        });
-        
-        if (processedData.length === 0) {
-          reject(new Error('Excel 文件中没有有效数据'));
-          return;
-        }
-        
-        // 更新当前数据
-        currentData = processedData;
-        localStorage.setItem("allUser", JSON.stringify(processedData));
-        localStorage.setItem("leftUsers", JSON.stringify(processedData));
-        
-        resolve(processedData);
-      } catch (error) {
-        reject(new Error('Excel 文件解析失败: ' + error.message));
-      }
-    };
-    
-    reader.onerror = () => {
-      reject(new Error('文件读取失败'));
-    };
-    
-    reader.readAsArrayBuffer(file);
-  });
-}
-
 // export function parseExcelWithMapping(file, selectedColumn) {
 //   return new Promise((resolve, reject) => {
 //     const reader = new FileReader();
     
-//     reader.onload = (e) => {
+//     reader.onload = async (e) => {
 //       try {
 //         const data = e.target.result;
-//         const workbook = XLSX.read(data, { type: 'array' });
-//         const firstSheetName = workbook.SheetNames[0];
-//         const worksheet = workbook.Sheets[firstSheetName];
+//         const workbook = new ExcelJS.Workbook();
+//         await workbook.xlsx.load(data);
         
-//         // 将 Excel 数据转换为数组
-//         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+//         // 获取第一个工作表
+//         const worksheet = workbook.worksheets[0];
+//         if (!worksheet) {
+//           reject(new Error('Excel文件没有工作表'));
+//           return;
+//         }
         
-//         // 过滤掉空行并只保留选中的列
-//         const processedData = jsonData
-//           .slice(1) // 跳过表头
-//           .filter(row => row[selectedColumn])
-//           .map(row => [
-//             String(row[selectedColumn]), // 选中的列
-//             String(row[selectedColumn]), // 重复一次作为显示名称
-//             "未分组" // 默认分组
-//           ]);
-
+//         // 读取数据并处理
+//         const processedData = [];
+//         let isFirstRow = true;
+        
+//         worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+//           // 跳过表头
+//           if (isFirstRow) {
+//             isFirstRow = false;
+//             return;
+//           }
+          
+//           const cellValue = row.getCell(parseInt(selectedColumn) + 1).value;
+//           if (cellValue) {
+//             processedData.push([
+//               String(cellValue), // 选中的列
+//               String(cellValue), // 重复一次作为显示名称
+//               "未分组" // 默认分组
+//             ]);
+//           }
+//         });
+        
 //         if (processedData.length === 0) {
 //           reject(new Error('Excel 文件中没有有效数据'));
 //           return;
 //         }
-
-//         // 更新当前数据
-//         currentData = processedData;
-//         // let storeData = getUsers();
-//         localStorage.setItem("allUser", JSON.stringify(processedData));
-//         localStorage.setItem("leftUsers", JSON.stringify(processedData));
         
-//         resolve(processedData);
+        // // 更新当前数据
+        // currentData = processedData;
+        // localStorage.setItem("allUser", JSON.stringify(processedData));
+        // localStorage.setItem("leftUsers", JSON.stringify(processedData));
+        
+        // resolve(processedData);
 //       } catch (error) {
 //         reject(new Error('Excel 文件解析失败: ' + error.message));
 //       }
 //     };
-
+    
 //     reader.onerror = () => {
 //       reject(new Error('文件读取失败'));
 //     };
-
+    
 //     reader.readAsArrayBuffer(file);
 //   });
 // }
+
+export function parseExcelWithMapping(file, selectedColumn) {
+  return new Promise((resolve, reject) => {
+    try {
+      const processedData = [];
+      selectedColumn = parseInt(selectedColumn);
+      const excelData = JSON.parse(localStorage.getItem("excelData")).slice(1);
+      excelData.forEach(row => {
+        processedData.push([
+          row[selectedColumn], row[selectedColumn], 
+          "未分组" // 默认分组
+        ]);
+      });
+      // 更新当前数据
+      localStorage.setItem("allUser", JSON.stringify(processedData));
+      localStorage.setItem("leftUsers", JSON.stringify(processedData));
+      
+      resolve(processedData);
+    } catch (error) {
+      reject(new Error('Excel 数据获取失败: ' + error.message));
+    }
+  })   
+}
 
 export default { EACH_COUNT, prizes, COMPANY, getUsers, luckyData, leftUsers, awardList, excludeUser, atmosphereGroupCard, background, setSecret, width, height }

@@ -14,13 +14,18 @@ import mockData, { parseExcelWithMapping } from "./mock";
 import ExcelJS from 'exceljs';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import {normalfont, boldfont} from './customfont.js';
+import {normalfont, boldfont, simfangfont, timesnewromanfont} from './customfont.js';
 
 var callAddFont = function () {
-this.addFileToVFS('FSGB2312-normal.ttf', normalfont);
-this.addFileToVFS('FSGB2312-bold.ttf', boldfont);
-this.addFont('FSGB2312-normal.ttf', 'FSGB2312', 'normal');
-this.addFont('FSGB2312-bold.ttf', 'FSGB2312', 'bold');
+  this.addFileToVFS('FSGB2312-normal.ttf', normalfont);
+  this.addFont('FSGB2312-normal.ttf', 'FSGB2312', 'normal');
+  this.addFileToVFS('FSGB2312-bold.ttf', boldfont);
+  this.addFont('FSGB2312-bold.ttf', 'FSGB2312', 'bold');
+
+  this.addFileToVFS('SimFang.ttf', simfangfont);
+  this.addFont('SimFang.ttf', 'SimFang', 'normal');
+  this.addFileToVFS('TimesNewRoman.ttf', timesnewromanfont);
+  this.addFont('TimesNewRoman.ttf', 'TimesNewRoman', 'normal');
 };
 jsPDF.API.events.push(['addFonts', callAddFont])
 
@@ -1054,6 +1059,14 @@ function exportToPDF(headers, data, title) {
         { align: 'center' }
       );
     },
+    didParseCell: function(data) {
+      if (data.section == 'body') {
+        // 检测是否包含中文字符
+      const hasChinese = /[\u4E00-\u9FA5]/.test(data.cell.text);
+      // 设置字体
+      data.cell.styles.font = hasChinese ? 'SimFang' : 'TimesNewRoman';
+      }
+    },
     // 表格绘制完成后执行
     didDrawCell: (data) => {
       // 为单元格添加边框
@@ -1882,6 +1895,7 @@ function lotteryRan(dataLength, signCount) {
   if (selectedLabel > -1) {
     // 获取Excel数据
     signCount = parseInt(localStorage.getItem("count"));
+    localStorage.setItem("enumCount", JSON.stringify(signCount));
     const excelData = JSON.parse(localStorage.getItem("excelData")) || [];
     if (excelData.length <= 1) return []; // 如果没有数据，返回空数组
     
@@ -2169,6 +2183,16 @@ window.onload = function () {
   });
 };
 
+function isValidValue(value) {
+  if (value === null || value === undefined) {
+      return false;
+  }
+  if (typeof value === 'string') {
+      return value.trim() !== ''; // 剔除纯空格、制表符等不可见字符
+  }
+  return true; // 数字、布尔值、日期等非字符串类型直接视为有效
+}
+
 
 // 预览Excel文件，获取列名
 async function previewExcel(file) {
@@ -2190,11 +2214,22 @@ async function previewExcel(file) {
         // 读取数据到数组
         const jsonData = [];
         worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
-          const rowData = [];
-          row.eachCell({ includeEmpty: true }, (cell) => {
-            rowData.push(cell.value);
-          });
-          jsonData.push(rowData);
+          let hasValidData = false;
+            // 遍历所有单元格（包括空单元格）
+            row.eachCell({ includeEmpty: true }, (cell) => {
+                // 检查值的有效性
+                if (isValidValue(cell.value)) {
+                    hasValidData = true;
+                }
+            });
+          if (hasValidData) {
+            console.log(`Row ${rowNumber} 数据:`, row.values);
+            const rowData = [];
+            row.eachCell({ includeEmpty: true }, (cell) => {
+              rowData.push(cell.text);
+            });
+            jsonData.push(rowData);
+          }
         });
         
         if (jsonData.length === 0) {
