@@ -14,7 +14,7 @@ import mockData, { parseExcelWithMapping } from "./mock";
 import ExcelJS from 'exceljs';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import {normalfont, boldfont, simfangfont, timesnewromanfont} from './customfont.js';
+import {normalfont, boldfont, simfangfont} from './font.js';
 
 var callAddFont = function () {
   this.addFileToVFS('FSGB2312-normal.ttf', normalfont);
@@ -24,8 +24,6 @@ var callAddFont = function () {
 
   this.addFileToVFS('SimFang.ttf', simfangfont);
   this.addFont('SimFang.ttf', 'SimFang', 'normal');
-  this.addFileToVFS('TimesNewRoman.ttf', timesnewromanfont);
-  this.addFont('TimesNewRoman.ttf', 'TimesNewRoman', 'normal');
 };
 jsPDF.API.events.push(['addFonts', callAddFont])
 
@@ -341,17 +339,31 @@ function bindEvent() {
           <option value="${index}" title="${col}">${truncateColumnName(col)}</option>
         `).join('')}
       </select>
-    `;
-    labels.innerHTML = `
-    <select name="dataLabel">
-      <option value="">无</option>
-      ${columns.map((col, index) => `
-        <option value="${index}" title="${col}">${truncateColumnName(col)}</option>
-      `).join('')}
-    </select>
-  `;
+      `;
+      labels.innerHTML = `
+      <select name="dataLabel">
+        <option value="">无</option>
+        ${columns.map((col, index) => `
+          <option value="${index}" title="${col}">${truncateColumnName(col)}</option>
+        `).join('')}
+      </select>
+      `;
       // columnsContainer.appendChild(item);
       dataLabels.appendChild(labels);
+      // 添加标签选择事件监听
+      const labelSelect = labels.querySelector('select[name="dataLabel"]');
+      labelSelect.addEventListener('change', (e) => {
+        const selectedValue = e.target.value;
+        if (selectedValue === '') {
+          // 如果选择"无"，启用输入框并恢复默认值
+          enumNumInput.disabled = false;
+          enumNumInput.value = localStorage.getItem("count") || '';
+        } else {
+          // 如果选择了标签，设置值为默认值数据总数并禁用输入框
+          enumNumInput.value = localStorage.getItem("count") || '';
+          enumNumInput.disabled = true;
+        }
+      });
       columnSelection.classList.remove('hidden');
       // customColumnsWrapper.classList.remove('hidden');
       uploadExcel.disabled = false;
@@ -857,7 +869,7 @@ async function exportExcelOnly() {
 
     // 样式设置
     worksheet.eachRow((row, rowNumber) =>{
-      row.font = {name: '仿宋_GB2312', size: 14, bold: false}
+      row.font = {name: '仿宋', size: 14, bold: false}
       row.font.size = rowNumber > 1? 14:18;
       row.font.bold = rowNumber > 2? false:true;
       if (rowNumber > 1) {
@@ -1014,7 +1026,7 @@ function exportToPDF(headers, data, title) {
     startY: 40,
     styles: {
       fillColor: [255, 255, 255], // 白色背景
-      font: 'FSGB2312', // 使用与Excel相同的中文字体
+      font: 'SimFang', // 使用与Excel相同的中文字体
       fontSize: 14, // 与Excel正文字体大小一致
       cellPadding: 3,
       lineWidth: 0.5, // 细边框
@@ -1059,14 +1071,14 @@ function exportToPDF(headers, data, title) {
         { align: 'center' }
       );
     },
-    didParseCell: function(data) {
-      if (data.section == 'body') {
-        // 检测是否包含中文字符
-      const hasChinese = /[\u4E00-\u9FA5]/.test(data.cell.text);
-      // 设置字体
-      data.cell.styles.font = hasChinese ? 'SimFang' : 'TimesNewRoman';
-      }
-    },
+    // didParseCell: function(data) {
+    //   if (data.section == 'body') {
+    //     // 检测是否包含中文字符
+    //   const hasChinese = /[\u4E00-\u9FA5]/.test(data.cell.text);
+    //   // 设置字体
+    //   data.cell.styles.font = hasChinese ? 'SimFang' : 'TimesNewRoman';
+    //   }
+    // },
     // 表格绘制完成后执行
     didDrawCell: (data) => {
       // 为单元格添加边框
