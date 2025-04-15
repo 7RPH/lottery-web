@@ -14,16 +14,13 @@ import mockData, { parseExcelWithMapping } from "./mock";
 import ExcelJS from 'exceljs';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import {normalfont, boldfont, simfangfont} from './font.js';
+import {normalfont, boldfont} from './font.js';
 
 var callAddFont = function () {
-  this.addFileToVFS('FSGB2312-normal.ttf', normalfont);
-  this.addFont('FSGB2312-normal.ttf', 'FSGB2312', 'normal');
-  this.addFileToVFS('FSGB2312-bold.ttf', boldfont);
-  this.addFont('FSGB2312-bold.ttf', 'FSGB2312', 'bold');
-
-  this.addFileToVFS('SimFang.ttf', simfangfont);
-  this.addFont('SimFang.ttf', 'SimFang', 'normal');
+  this.addFileToVFS('SimFang-normal.ttf', normalfont);
+  this.addFont('SimFang-normal.ttf', 'SimFang', 'normal');
+  this.addFileToVFS('SimFang-bold.ttf', boldfont);
+  this.addFont('SimFang-bold.ttf', 'SimFang', 'bold');
 };
 jsPDF.API.events.push(['addFonts', callAddFont])
 
@@ -991,7 +988,7 @@ function exportToPDF(headers, data, title) {
   });
   
   // 添加文档标题
-  pdf.setFont('FSGB2312', 'bold');
+  pdf.setFont('SimFang', 'bold');
   pdf.setFontSize(18); // 与Excel标题字体大小一致
   pdf.text(title, pdf.internal.pageSize.getWidth() / 2, 25, { align: 'center' });
   
@@ -1010,7 +1007,7 @@ function exportToPDF(headers, data, title) {
       cellPadding: 2,
       lineWidth: 0.5, // 细边框
       lineColor: [0, 0, 0], // 黑色边框
-      font: 'FSGB2312'
+      font: 'SimFang'
     };
     
     // 为数字列设置居中对齐
@@ -1043,7 +1040,7 @@ function exportToPDF(headers, data, title) {
       fontStyle: 'bold',
       lineWidth: 0.5, // 细边框
       lineColor: [0, 0, 0], // 黑色边框
-      font: 'FSGB2312',
+      font: 'SimFang',
     },
     alternateRowStyles: {
       fillColor: [255, 255, 255] // 确保交替行也是白色
