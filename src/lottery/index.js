@@ -327,6 +327,7 @@ function bindEvent() {
       };
       const item = document.createElement('div');
       const labels = document.createElement('div');
+      const labelUseFor = document.getElementById("labelUseForDiv");
       item.className = 'column-item';
       labels.className = 'column-item';
       item.innerHTML = `
@@ -352,11 +353,28 @@ function bindEvent() {
       labelSelect.addEventListener('change', (e) => {
         const selectedValue = e.target.value;
         if (selectedValue === '') {
-          // 如果选择"无"，启用输入框并恢复默认值
-          enumNumInput.disabled = false;
-          enumNumInput.value = localStorage.getItem("count") || '';
+          // 如果选择"无"，隐藏标签用途
+          labelUseFor.classList.add("hidden");
+          // enumNumInput.disabled = false;
+          // enumNumInput.value = localStorage.getItem("count") || '';
         } else {
-          // 如果选择了标签，设置值为默认值数据总数并禁用输入框
+          // 如果选择了标签，显示标签用途设置
+          labelUseFor.classList.remove("hidden");
+          // enumNumInput.value = localStorage.getItem("count") || '';
+          // enumNumInput.disabled = true;
+        }
+      });
+      // 添加标签选择事件监听
+      const labelUseSelect = labelUseFor.querySelector('select[name="labelUseFor"]');
+      labelUseSelect.addEventListener('change', (e) => {
+        const selectedValue = e.target.value;
+        if (selectedValue === '数据均分') {
+          // 如果选择"数据均分"，启用输入框并恢复默认值
+          enumNumInput.disabled = false;
+          enumNumInput.value = enumNum;
+        } else {
+          // 如果选择了数据聚合，设置签数值为默认值数据总数并禁用输入框
+          enumNum = enumNumInput.value;
           enumNumInput.value = localStorage.getItem("count") || '';
           enumNumInput.disabled = true;
         }
@@ -393,6 +411,7 @@ function bindEvent() {
     
     if (selectedLabel !== -1) {
       localStorage.setItem("selectedLabel", JSON.stringify(selectedLabel));
+      localStorage.setItem("labelUseFor", document.querySelector('select[name="labelUseFor"]').value);
     }
     // // 验证是否选择了列
     // if (selectedColumn === '') {
@@ -850,7 +869,7 @@ async function exportExcelOnly() {
     // 创建新的 ExcelJS 工作簿
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet(title);
-    const headers = [...originColumns, ...customColumns];
+    const headers = [...originColumns, ...customColumns, "确认签字"];
     let nowCell = worksheet.getCell("A1");
     worksheet.mergeCells(1, 1, 1, headers.length)
     
@@ -860,7 +879,7 @@ async function exportExcelOnly() {
 
     // 添加数据
     exportData.forEach(row => {
-      const rowData = headers.map(col => row[col] || '');
+      const rowData = headers.map(col => row[col] || '          ');
       worksheet.addRow(rowData);
     });
 
@@ -936,7 +955,7 @@ async function exportPDFOnly() {
       customColumns.forEach((colName) => {
         newRow[colName] = getRandomResult(index);
       });
-
+      newRow["确认签字"] = "          ";
       return newRow;
     });
 
@@ -956,7 +975,7 @@ async function exportPDFOnly() {
       });
     });
 
-    const headers = [...originColumns, ...customColumns];
+    const headers = [...originColumns, ...customColumns, "确认签字"];
     
     // 导出PDF
     exportToPDF(headers, exportData, title);
@@ -1902,52 +1921,131 @@ function lotteryRan(dataLength, signCount) {
   
   // 如果用户设置了label
   if (selectedLabel > -1) {
-    // 获取Excel数据
-    signCount = parseInt(localStorage.getItem("count"));
-    localStorage.setItem("enumCount", JSON.stringify(signCount));
-    const excelData = JSON.parse(localStorage.getItem("excelData")) || [];
-    if (excelData.length <= 1) return []; // 如果没有数据，返回空数组
-    
-    // 获取标签列数据（跳过表头）
-    const labelData = excelData.slice(1).map(row => row[selectedLabel]);
-    // 创建标签到索引的映射
-    const labelToIndices = {};
-    labelData.forEach((label, index) => {
-      if (!labelToIndices[label]) {
-        labelToIndices[label] = [];
-      }
-      labelToIndices[label].push(index);
-    });
-    // 获取所有唯一的标签
-    const uniqueLabels = Object.keys(labelToIndices);
-    
-    // 为每个标签生成随机签号，并确保相同标签的数据是连续的
-    const result = [];
-    
-    // 随机打乱标签顺序，使不同标签的排列也是随机的
-    const shuffledLabels = [...uniqueLabels];
-    for (let i = shuffledLabels.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffledLabels[i], shuffledLabels[j]] = [shuffledLabels[j], shuffledLabels[i]];
-    }
-    
-    // 按打乱后的标签顺序添加索引
-    shuffledLabels.forEach(label => {
-      const indices = labelToIndices[label];
-      const selectedIndices = [...indices];
-      for (let i = selectedIndices.length - 1; i > 0; i--) {
+    // 判断是采用数据聚合还是数据均分
+    const labelUseFor = localStorage.getItem("labelUseFor");
+    if (labelUseFor === "数据聚合") {
+      // 获取Excel数据
+      signCount = parseInt(localStorage.getItem("count"));
+      localStorage.setItem("enumCount", JSON.stringify(signCount));
+      const excelData = JSON.parse(localStorage.getItem("excelData")) || [];
+      if (excelData.length <= 1) return []; // 如果没有数据，返回空数组
+      
+      // 获取标签列数据（跳过表头）
+      const labelData = excelData.slice(1).map(row => row[selectedLabel]);
+      // 创建标签到索引的映射
+      const labelToIndices = {};
+      labelData.forEach((label, index) => {
+        if (!labelToIndices[label]) {
+          labelToIndices[label] = [];
+        }
+        labelToIndices[label].push(index);
+      });
+      // 获取所有唯一的标签
+      const uniqueLabels = Object.keys(labelToIndices);
+      
+      // 为每个标签生成随机签号，并确保相同标签的数据是连续的
+      const result = [];
+      
+      // 随机打乱标签顺序，使不同标签的排列也是随机的
+      const shuffledLabels = [...uniqueLabels];
+      for (let i = shuffledLabels.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [selectedIndices[i], selectedIndices[j]] = [selectedIndices[j], selectedIndices[i]];
+        [shuffledLabels[i], shuffledLabels[j]] = [shuffledLabels[j], shuffledLabels[i]];
       }
-      result.push(...selectedIndices);
-    });
-    let arr = Array.from({ length: signCount }, (_, i) => result.indexOf(i) + 1);
-    // for (let i = 0; i < arr.length; i++) {
-    //   [arr[i], arr[j]] = [arr[j], arr[i]];
-    // }
-    // 保存随机结果到localStorage
-    localStorage.setItem("randomResult", JSON.stringify(arr));
-    return arr;
+      
+      // 按打乱后的标签顺序添加索引
+      shuffledLabels.forEach(label => {
+        const indices = labelToIndices[label];
+        const selectedIndices = [...indices];
+        for (let i = selectedIndices.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [selectedIndices[i], selectedIndices[j]] = [selectedIndices[j], selectedIndices[i]];
+        }
+        result.push(...selectedIndices);
+      });
+      let arr = Array.from({ length: signCount }, (_, i) => result.indexOf(i) + 1);
+      // for (let i = 0; i < arr.length; i++) {
+      //   [arr[i], arr[j]] = [arr[j], arr[i]];
+      // }
+      // 保存随机结果到localStorage
+      localStorage.setItem("randomResult", JSON.stringify(arr));
+      return arr;
+    }
+    else {
+      // 使用数据均分
+      const groupNum = Math.ceil(dataLength / signCount);
+      const excelData = JSON.parse(localStorage.getItem("excelData")) || [];
+      if (excelData.length <= 1) return []; // 如果没有数据，返回空数组
+
+      // 获取标签列数据（跳过表头）
+      const labelData = excelData.slice(1).map(row => row[selectedLabel]);
+      // 创建标签到数据的映射（类似Python的groupby）
+      const groupedData = {};
+      labelData.forEach((label, index) => {
+          if (!groupedData[label]) {
+            groupedData[label] = [];
+          }
+          groupedData[label].push(index);
+        });
+
+      // 将分组转换为数组并按长度排序
+      const shuffledGroups = Object.values(groupedData)
+          .sort((a, b) => b.length - a.length);
+      // 随机打乱每个组内的顺序
+      shuffledGroups.forEach(group => {
+          for (let i = group.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [group[i], group[j]] = [group[j], group[i]];
+          }
+      });
+
+      // 计算每个组应该分配的数量
+      const splitLen = signCount;
+
+      // 创建结果数组
+      const result = Array(splitLen).fill().map(() => []);
+      // 分配数据到结果数组
+      shuffledGroups.forEach(group => {
+          let start = Math.floor(Math.random() * splitLen);
+          let now = 0;
+          
+          while (now < group.length) {
+          if (result[start % splitLen].length < groupNum) {
+              result[start % splitLen].push(group[now]);
+              now++;
+          }
+          start++;
+          }
+      });
+      // 打乱组的排序
+      for (let i = result.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
+        }
+      // 按长度排序并
+      result.sort((a, b) => b.length - a.length);
+      // 打乱每个组内部的顺序
+      result.forEach(group => {
+          for (let i = group.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [group[i], group[j]] = [group[j], group[i]];
+          }
+      });
+      console.log("result", result);
+      // 展平结果数组
+      const flattenedResult = result.flat();
+
+      // 生成最终的签号数组
+      const returnResult = [];
+      for (let i = 0; i < flattenedResult.length; i++) {
+          returnResult.push(Math.floor(flattenedResult.indexOf(i) / groupNum) + 1);
+      }
+
+      // 保存随机结果到localStorage
+      localStorage.setItem("randomResult", JSON.stringify(returnResult));
+      return returnResult;
+
+    }
   } else {
     // 原有的随机逻辑，不按标签分组
     if (signCount >= dataLength) {

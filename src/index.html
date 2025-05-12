@@ -97,13 +97,20 @@
         </div>
         <div id="columnSelection" class="column-selection hidden">
           <!-- <h4>请选择展示数据列（用于在抽签展示的卡片上显示）</h4> -->
-          <div class="columns-container">
-            <!-- 动态添加的列选择框 -->
-          </div>
           <h4>请选择数据标签（用于特殊抽签情况，比如依据专业抽签等）</h4>
-          <h4>启动此项后，签数将始终设置为总数据条数</h4>
           <div class="columns-container" id="dataLabels">
             <!-- 动态添加的列选择框 -->
+          </div>
+          
+          <div class="hidden" id="labelUseForDiv">
+            <h4>请选择标签使用方式</h4>
+            <h4>* 同类聚合启用时，签数将维持在总数据条数</h4>
+            <div class="column-item">
+              <select name="labelUseFor">
+                <option value="数据均分" title="同标签的数据会均匀抽到不同的签">混搭分布</option>
+                <option value="数据聚合" title="同标签数据会连号，启用时，签数将维持在总数据条数">同类聚合</option>
+              </select>
+            </div>
           </div>
         </div>
         <button id="uploadExcel" class="upload-btn hidden" disabled>设置完成</button>
