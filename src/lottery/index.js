@@ -2333,7 +2333,7 @@ async function previewExcel(file) {
             console.log(`Row ${rowNumber} 数据:`, row.values);
             const rowData = [];
             row.eachCell({ includeEmpty: true }, (cell) => {
-              rowData.push(cell.text);
+              rowData.push(cell.text.trim());
             });
             jsonData.push(rowData);
           }
