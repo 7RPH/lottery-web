@@ -901,7 +901,8 @@ async function exportExcelOnly() {
     })
     
     worksheet.columns.forEach(column => {
-      const lengths = column.values.map(v => {
+      const lengths = column.values.map((v, index) => {
+        if (index <= 1) return 0;
         if (!v) return 0;
         const str = v.toString();
         let length = 0;
