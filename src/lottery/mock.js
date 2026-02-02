@@ -249,13 +249,47 @@ export function parseExcelWithMapping(file, selectedColumn) {
     try {
       const processedData = [];
       selectedColumn = parseInt(selectedColumn);
-      const excelData = JSON.parse(localStorage.getItem("excelData")).slice(1);
-      excelData.forEach(row => {
-        processedData.push([
-          row[selectedColumn], row[selectedColumn], 
-          "未分组" // 默认分组
-        ]);
+      
+      // 检查localStorage中是否存在excelData
+      const excelDataStr = localStorage.getItem("excelData");
+      if (!excelDataStr) {
+        reject(new Error('Excel数据不存在，请先上传文件'));
+        return;
+      }
+      
+      const excelData = JSON.parse(excelDataStr);
+      
+      // 检查excelData是否为数组
+      if (!Array.isArray(excelData)) {
+        reject(new Error('Excel数据格式错误'));
+        return;
+      }
+      
+      // 检查数组是否有数据
+      if (excelData.length <= 1) {
+        reject(new Error('Excel文件中没有有效数据'));
+        return;
+      }
+      
+      // 处理数据
+      const dataWithoutHeader = excelData.slice(1);
+      dataWithoutHeader.forEach(row => {
+        // 检查row是否为数组且索引是否存在
+        if (Array.isArray(row) && row.length > selectedColumn) {
+          processedData.push([
+            String(row[selectedColumn] || ''), 
+            String(row[selectedColumn] || ''), 
+            "未分组" // 默认分组
+          ]);
+        }
       });
+      
+      // 检查处理后的数据是否有内容
+      if (processedData.length === 0) {
+        reject(new Error('Excel文件中没有有效数据'));
+        return;
+      }
+      
       // 更新当前数据
       localStorage.setItem("allUser", JSON.stringify(processedData));
       localStorage.setItem("leftUsers", JSON.stringify(processedData));

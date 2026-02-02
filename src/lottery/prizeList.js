@@ -1,5 +1,6 @@
 
 import mockData from './mock'
+import DanMu from './components/DanMu'
 const MAX_TOP = 300,
   MAX_WIDTH = document.body.clientWidth;
 
@@ -24,130 +25,6 @@ let lastDanMuList = [];
 
 let prizeElement = {},
   lasetPrizeIndex = 0;
-class DanMu {
-  constructor(option) {
-    if (typeof option !== "object") {
-      option = {
-        text: option
-      };
-    }
-
-    this.position = {};
-    this.text = option.text;
-    this.onComplete = option.onComplete;
-
-    this.init();
-  }
-
-  init() {
-    this.element = document.createElement("div");
-    this.element.className = "dan-mu";
-    document.body.appendChild(this.element);
-
-    this.start();
-  }
-
-  setText(text) {
-    this.text = text || this.text;
-    this.element.textContent = this.text;
-    this.width = this.element.clientWidth + 100;
-  }
-
-  start(text) {
-    let speed = ~~(Math.random() * 10000) + 6000;
-    this.position = {
-      x: MAX_WIDTH
-    };
-    let delay = speed / 10;
-
-    this.setText(text);
-    this.element.style.transform = "translateX(" + this.position.x + "px)";
-    this.element.style.top = ~~(Math.random() * MAX_TOP) + 10 + "px";
-    this.element.classList.add("active");
-    this.tween = new TWEEN.Tween(this.position)
-      .to(
-        {
-          x: -this.width
-        },
-        speed
-      )
-      .onUpdate(() => {
-        this.render();
-      })
-      .onComplete(() => {
-        this.onComplete && this.onComplete();
-      })
-      .start();
-  }
-
-  render() {
-    this.element.style.transform = "translateX(" + this.position.x + "px)";
-  }
-}
-
-class Qipao {
-  constructor(option) {
-    if (typeof option !== "object") {
-      option = {
-        text: option
-      };
-    }
-
-    this.text = option.text;
-    this.onComplete = option.onComplete;
-    this.$par = document.querySelector(".qipao-container");
-    if (!this.$par) {
-      this.$par = document.createElement("div");
-      this.$par.className = "qipao-container";
-      document.body.appendChild(this.$par);
-    }
-
-    this.init();
-  }
-
-  init() {
-    this.element = document.createElement("div");
-    this.element.className = "qipao animated";
-    this.$par.appendChild(this.element);
-
-    this.start();
-  }
-
-  setText(text) {
-    this.text = text || this.text;
-    this.element.textContent = this.text;
-  }
-
-  start(text) {
-    this.setText(text);
-    this.element.classList.remove("bounceOutRight");
-    this.element.classList.add("bounceInRight");
-
-    setTimeout(() => {
-      this.element.classList.remove("bounceInRight");
-      this.element.classList.add("bounceOutRight");
-      this.onComplete && this.onComplete();
-    }, 4000);
-  }
-}
-
-let addQipao = (() => {
-  let qipaoList = [];
-  return function (text) {
-    // let qipao;
-    // if (qipaoList.length > 0) {
-    //   qipao = qipaoList.shift();
-    // } else {
-    //   qipao = new Qipao({
-    //     onComplete() {
-    //       qipaoList.push(qipao);
-    //     }
-    //   });
-    // }
-
-    // qipao.start(text);
-  };
-})();
 
 function setPrizes(pri) {
   prizes = pri;
@@ -300,6 +177,5 @@ export {
   setPrizeData,
   addDanMu,
   setPrizes,
-  resetPrize,
-  addQipao
+  resetPrize
 };
