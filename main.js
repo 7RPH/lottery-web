@@ -1,7 +1,31 @@
 const { app, BrowserWindow } = require('electron')
 const path = require('path')
 
-function createWindow () {
+// 添加一个标志变量来跟踪是否是首次启动
+let isFirstLaunch = true;
+
+async function clearLocalStorage() {
+  const tempWin = new BrowserWindow({
+    show: false,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false
+    }
+  });
+  
+  await tempWin.loadFile('dist/index.html');
+  await tempWin.webContents.executeJavaScript(`
+    localStorage.clear();
+  `);
+  tempWin.close();
+}
+
+async function createWindow () {
+  // 如果是首次启动，先清除缓存
+  if (isFirstLaunch) {
+    await clearLocalStorage();
+    isFirstLaunch = false;
+  }
   const win = new BrowserWindow({
     // width: 1920,
     // height: 1080,

@@ -1010,7 +1010,7 @@ function exportToPDF(headers, data, title) {
   // 添加文档标题
   pdf.setFont('SimFang', 'bold');
   pdf.setFontSize(18); // 与Excel标题字体大小一致
-  pdf.text(title, pdf.internal.pageSize.getWidth() / 2, 25, { align: 'center' });
+  pdf.text(title, pdf.internal.pageSize.getWidth() / 2, 50, { align: 'center' }); // 将标题向下移动到50pt位置
   
   // 准备表格数据
   const tableData = data.map(row => headers.map(header => row[header] || ''));
@@ -1040,12 +1040,13 @@ function exportToPDF(headers, data, title) {
   autoTable(pdf, {
     head: [headers],
     body: tableData,
-    startY: 40,
+    startY: 70, // 表格开始位置下移
     styles: {
       fillColor: [255, 255, 255], // 白色背景
       font: 'SimFang', // 使用与Excel相同的中文字体
       fontSize: 14, // 与Excel正文字体大小一致
-      cellPadding: 3,
+      cellPadding: 3, // 增加单元格内边距
+      minCellHeight: 35, // 设置最小单元格高度
       lineWidth: 0.5, // 细边框
       lineColor: [0, 0, 0], // 黑色边框
       textColor: [0, 0, 0], 
@@ -1074,55 +1075,22 @@ function exportToPDF(headers, data, title) {
       // 根据页码设置不同的上边距
       if (currentPage > 1) {
         // 从第二页开始使用较小的上边距
-        data.settings.margin.top = 35;
+        data.settings.margin.top = 50;
         
         // 因为是新页面，需要设置表头的Y位置
-        data.cursor.y = 35;
+        data.cursor.y = 50;
       }
       // 添加页脚
       pdf.setFontSize(10);
       pdf.text(
         `${title} - 第 ${pdf.internal.getNumberOfPages()} 页`, 
         pdf.internal.pageSize.getWidth() / 2, 
-        pdf.internal.pageSize.getHeight() - 10, 
+        pdf.internal.pageSize.getHeight() - 40, 
         { align: 'center' }
       );
     },
-    // didParseCell: function(data) {
-    //   if (data.section == 'body') {
-    //     // 检测是否包含中文字符
-    //   const hasChinese = /[\u4E00-\u9FA5]/.test(data.cell.text);
-    //   // 设置字体
-    //   data.cell.styles.font = hasChinese ? 'SimFang' : 'TimesNewRoman';
-    //   }
-    // },
-    // 表格绘制完成后执行
-    didDrawCell: (data) => {
-      // 为单元格添加边框
-      const cell = data.cell;
-      if (cell.section === 'body') {
-        pdf.setDrawColor(0);
-        pdf.setLineWidth(0.5);
-        pdf.line(cell.x, cell.y, cell.x + cell.width, cell.y); // 上边框
-        pdf.line(cell.x, cell.y + cell.height, cell.x + cell.width, cell.y + cell.height); // 下边框
-        pdf.line(cell.x, cell.y, cell.x, cell.y + cell.height); // 左边框
-        pdf.line(cell.x + cell.width, cell.y, cell.x + cell.width, cell.y + cell.height); // 右边框
-      }
-    },
-    willDrawCell: (data) => {
-      // 根据内容自动调整列宽
-      const cell = data.cell;
-      if (cell.text) {
-        // 特殊处理中文字符，使其有更合适的宽度
-        const text = cell.text.toString();
-        let count = 0;
-        for (let i = 0; i < text.length; i++) {
-          count += /[\u4e00-\u9fa5]/.test(text[i]) ? 2 : 1;
-        }
-      }
-    },
-    // 设置页边距，确保符合A4打印要求
-    margin: { top: 40, right: 30, bottom: 25, left: 30 },
+    // 设置表格结束位置，确保不会与页脚重叠
+    margin: { top: 40, right: 30, bottom: 50, left: 30 }, // 增加底部边距
     // 确保表格适应页面宽度
     tableWidth: 'auto',
     // 自动分页处理
@@ -2369,58 +2337,4 @@ async function previewExcel(file) {
     reader.readAsArrayBuffer(file);
   });
 }
-// // 预览Excel文件，获取列名
-// async function previewExcel(file) {
-//   return new Promise((resolve, reject) => {
-//     const reader = new FileReader();
-//     reader.onload = (e) => {
-//       try {
-//         const data = e.target.result;
-//         // console.log('File data:', data); // 调试日志
 
-//         const workbook = XLSX.read(data, { type: 'array' });
-//         // console.log('Workbook:', workbook); // 调试日志
-
-//         const firstSheetName = workbook.SheetNames[0];
-//         if (!firstSheetName) {
-//           reject(new Error('Excel文件没有工作表'));
-//           return;
-//         }
-
-//         const worksheet = workbook.Sheets[firstSheetName];
-//         if (!worksheet) {
-//           reject(new Error('无法读取工作表数据'));
-//           return;
-//         }
-
-//         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-//         // console.log('Parsed data:', jsonData); // 调试日志
-
-//         if (!jsonData || jsonData.length === 0) {
-//           reject(new Error('Excel文件为空'));
-//           return;
-//         }
-//         localStorage.setItem("excelData", JSON.stringify(jsonData));
-//         // 获取第一行作为列名
-//         const columns = jsonData[0];
-//         localStorage.setItem("count", jsonData.length - 1);
-//         if (!columns || columns.length === 0) {
-//           reject(new Error('未找到列名'));
-//           return;
-//         }
-
-//         resolve(columns);
-//       } catch (error) {
-//         // console.error('Excel解析错误:', error); // 调试日志
-//         reject(new Error(`Excel文件解析失败: ${error.message}`));
-//       }
-//     };
-
-//     reader.onerror = (error) => {
-//       // console.error('文件读取错误:', error); // 调试日志
-//       reject(new Error('文件读取失败'));
-//     };
-
-//     reader.readAsArrayBuffer(file);
-//   });
-// }
