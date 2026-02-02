@@ -4,3 +4,4 @@ dist/
 electron-dist/
 temp.json
 error.json
+.DS_Store
